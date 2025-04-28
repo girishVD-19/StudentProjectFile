@@ -5,7 +5,7 @@ public class LaptopDTO {
     private boolean isAssigned; // True or False
     private int modelNo;
     
-    public LaptopDTO() {
+    public LaptopDT() {
     	
     }
 	public LaptopDTO(int laptopId, boolean isAssigned, int modelNo) {
