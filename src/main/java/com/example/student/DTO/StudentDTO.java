@@ -1,7 +1,5 @@
 package com.example.student.DTO;
 
-import com.example.student.entity.Gd_Class;
-import com.example.student.entity.Gd_Laptop;
 
 public class StudentDTO {
 	private Integer rollNo; // rollNo is now Integer
