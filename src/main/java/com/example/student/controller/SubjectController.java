@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,7 +50,7 @@ public class SubjectController {
 	                .orElse(ResponseEntity.notFound().build());
 	    }
 
-	    @DeleteMapping("/{id}")
+	    @DeleteMapping("delete/{id}")
 	    public ResponseEntity<Void> deleteSubject(@PathVariable int id) {
 	        boolean deleted = subjectservice.deleteSubject(id);
 	        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
