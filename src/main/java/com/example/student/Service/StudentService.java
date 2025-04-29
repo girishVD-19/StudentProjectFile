@@ -70,7 +70,7 @@ public class StudentService {
     }
 	
 	
-   //ToGet Data of perticular student data.
+   //ToGet Data of particular student data.
 	 public StudentDTO getStudentById(int Id) {
 		 Optional<Gd_Student> optionalStudent = studentrepository.findById(Id);
 

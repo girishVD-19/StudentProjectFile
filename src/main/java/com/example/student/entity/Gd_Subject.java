@@ -2,9 +2,14 @@ package com.example.student.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -14,16 +19,17 @@ import jakarta.persistence.Table;
 public class Gd_Subject {
 	
 	@Id
-	@Column(unique=true)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int SUBJECT_ID;
+	public Gd_Subject() {
+		
+	}
 	
-	public Gd_Subject(int sUBJECT_ID, List<Gd_Subject_Mapping> gd_Subject_Mapping, String sUBJECT_NAME) {
+	public Gd_Subject( List<Gd_Subject_Mapping> gd_Subject_Mapping, String sUBJECT_NAME) {
 		super();
-		SUBJECT_ID = sUBJECT_ID;
 		this.gd_subject_mapping = gd_Subject_Mapping;
 		SUBJECT_NAME = sUBJECT_NAME;
 	}
-
 	@OneToMany(mappedBy="gd_subject" , cascade=CascadeType.ALL)
     private List<Gd_Subject_Mapping> gd_subject_mapping; 
     
