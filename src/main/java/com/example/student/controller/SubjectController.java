@@ -3,7 +3,6 @@ package com.example.student.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.Service.SubjectService;
 import com.example.student.entity.Gd_Subject;
+import com.example.student.repository.SubjectRepository;
 
 @RestController
 @RequestMapping("Subject")
@@ -23,11 +23,13 @@ public class SubjectController {
 	
 	@Autowired
 	private SubjectService subjectservice;
+	@Autowired
+	private SubjectRepository subjectrepository;
 	
-	 @PostMapping("Add")
-	    public ResponseEntity<Gd_Subject> createSubject(@RequestBody Gd_Subject subject) {
-	        return ResponseEntity.ok(subjectservice.saveSubject(subject));
-	    }
+	@PostMapping("/Add")
+	public Gd_Subject createOrUpdateSubject(@RequestBody Gd_Subject subject) {
+		return subjectrepository.save(subject);
+	}
 
 	    @GetMapping("All")
 	    public ResponseEntity<List<Gd_Subject>> getAllSubjects() {

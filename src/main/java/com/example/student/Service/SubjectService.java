@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.example.student.entity.Gd_Subject;
 import com.example.student.repository.SubjectRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class SubjectService {
 	
@@ -17,9 +19,6 @@ public class SubjectService {
 	
 	@Autowired
 	private SubjectRepository subjectrepository;
-    public Gd_Subject saveSubject(Gd_Subject subject) {
-        return subjectrepository.save(subject);
-    }
 
     // Read All
     public List<Gd_Subject> getAllSubjects() {

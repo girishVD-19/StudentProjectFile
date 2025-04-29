@@ -19,17 +19,19 @@ import jakarta.persistence.Table;
 public class Gd_Subject {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int SUBJECT_ID;
 	public Gd_Subject() {
 		
 	}
 	
-	public Gd_Subject( List<Gd_Subject_Mapping> gd_Subject_Mapping, String sUBJECT_NAME) {
+	public Gd_Subject(int sUBJECT_ID, List<Gd_Subject_Mapping> gd_Subject_Mapping, String sUBJECT_NAME) {
 		super();
+		SUBJECT_ID = sUBJECT_ID;
 		this.gd_subject_mapping = gd_Subject_Mapping;
 		SUBJECT_NAME = sUBJECT_NAME;
 	}
+    @JsonIgnore
 	@OneToMany(mappedBy="gd_subject" , cascade=CascadeType.ALL)
     private List<Gd_Subject_Mapping> gd_subject_mapping; 
     
