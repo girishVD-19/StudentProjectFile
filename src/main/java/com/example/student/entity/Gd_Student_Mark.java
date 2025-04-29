@@ -2,6 +2,7 @@ package com.example.student.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -22,10 +23,12 @@ public class Gd_Student_Mark {
     private int MARK_ID;
 	
 	@ManyToOne
+	@JsonIgnore
 	@JoinColumn(name="STUDENT_ID")
 	private Gd_Student gd_student;
 	
 	@ManyToOne
+	@JsonIgnore
 	@JoinColumn(name="SUBJECT_ID")
 	private Gd_Subject gd_subject;
 	
@@ -33,12 +36,17 @@ public class Gd_Student_Mark {
 	private int MARKS;
 	
 	@Column
-	private int REMARK;
+	private String REMARK;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy="gd_student_mark" ,cascade=CascadeType.ALL)
 	private List<Gd_Student_History>gd_student_history;
+	
+	public Gd_Student_Mark() {
+		
+	}
 
-	public Gd_Student_Mark(Gd_Student gd_Student, Gd_Subject gd_Subject, int mARKS, int rEMARK,
+	public Gd_Student_Mark(Gd_Student gd_Student, Gd_Subject gd_Subject, int mARKS, String rEMARK,
 			List<Gd_Student_History> gd_Student_History) {
 		super();
 		this.gd_student = gd_Student;
@@ -80,11 +88,11 @@ public class Gd_Student_Mark {
 		MARKS = mARKS;
 	}
 
-	public int getREMARK() {
+	public String getREMARK() {
 		return REMARK;
 	}
 
-	public void setREMARK(int rEMARK) {
+	public void setREMARK(String rEMARK) {
 		REMARK = rEMARK;
 	}
 
