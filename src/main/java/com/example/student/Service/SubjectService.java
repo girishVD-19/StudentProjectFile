@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import com.example.student.entity.Gd_Subject;
 import com.example.student.repository.SubjectRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class SubjectService {
 	
