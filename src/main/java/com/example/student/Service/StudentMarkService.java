@@ -62,5 +62,4 @@ public class StudentMarkService {
     public void deleteMarkById(int id) {
         markRepository.deleteById(id);
     }
-	
 }
