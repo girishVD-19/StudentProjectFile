@@ -58,7 +58,7 @@ public class StudentService {
 	                    }
 
 	                    // Return the mapped StudentDTO
-	                    return new StudentDTO(
+	                    return new StudentTO(
 	                        student.getROLL_NO(),
 	                        student.getNAME(),
 	                        student.getCITY(),
