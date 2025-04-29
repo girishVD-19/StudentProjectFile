@@ -61,14 +61,10 @@ public class Gd_Subject {
 		SUBJECT_ID = sUBJECT_ID;
 	}
    
-	
 	@Override
 	public String toString() {
 		return "GD_SUBJECT [SUBJECT_ID=" + SUBJECT_ID + ", gd_subject_mapping=" + gd_subject_mapping + ", SUBJECT_NAME="
 				+ SUBJECT_NAME + "]";
 	}
     
-    
-    
-
 }

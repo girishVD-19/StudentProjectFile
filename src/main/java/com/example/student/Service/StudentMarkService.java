@@ -59,10 +59,8 @@ public class StudentMarkService {
             mark.getREMARK()
         );
     }
-
     public void deleteMarkById(int id) {
         markRepository.deleteById(id);
     }
-
 	
 }
