@@ -63,7 +63,7 @@ public class StudentService {
 	                        student.getNAME(),
 	                        student.getCITY(),
 	                        classDetails,
-	                        laptopDetails
+	                       laptopDetails
 	                    );
 	                })
 	                .collect(Collectors.toList());
@@ -183,6 +183,12 @@ public class StudentService {
 	        Gd_Laptop laptop = existingLaptopOpt.get();
 	        if (laptop.getIS_ASSIGNED() == 1) {
 	            throw new IllegalStateException("Laptop with ID " + laptopId + " is already assigned.");
+	        }
+	        
+	        Gd_Laptop oldLaptop = existingStudent.getGd_laptop();
+	        if (oldLaptop != null) {
+	            oldLaptop.setIS_ASSIGNED(0);
+	            laptoprepository.save(oldLaptop);
 	        }
 
 	        laptop.setIS_ASSIGNED(1);

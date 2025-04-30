@@ -9,11 +9,15 @@ public class LaptopDTO {
 	    private List<Integer> studentIds;  
 	    // This will hold the studentDTO with studentId
 	    
+	    public LaptopDTO() {
+	    	
+	    }
+	    
 		public LaptopDTO(Integer laptopId, int modelNo, int isAssigned, List<Integer> studentIds) {
 	        this.laptopId = laptopId;
 	        this.modelNo = modelNo;
-	        this.assigned = (isAssigned == 1); // Convert the int value to boolean
-	        this.studentIds = studentIds;  // Initialize studentIds with the provided list
+	        this.assigned = (isAssigned == 1); 
+	        this.studentIds = studentIds;  
 	    }
 	
 		public LaptopDTO(Integer laptopId,  boolean assigned, int modelNo) {

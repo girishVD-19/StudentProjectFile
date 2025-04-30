@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.student.entity.Gd_Rooms;
-import com.example.student.repository.RoomReopsitory;
+import com.example.student.repository.RoomRepository;
 
 @Service
 public class RoomsService {
 	
 	@Autowired
-	private RoomReopsitory roomrepository;
+	private RoomRepository roomrepository;
 	public List<Gd_Rooms> getAllRooms() {
         return roomrepository.findAll();
     }

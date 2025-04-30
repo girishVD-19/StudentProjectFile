@@ -3,6 +3,8 @@ package com.example.student.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -13,6 +15,7 @@ import jakarta.persistence.Table;
 public class Gd_Subject_Mapping {
 	
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int SR_NO;
 	
 	
@@ -44,6 +47,10 @@ public Gd_Subject_Mapping(int sR_NO, Gd_Class gd_class, Gd_Subject gd_subject) {
 	SR_NO = sR_NO;
 	this.gd_class = gd_class;
 	this.gd_subject = gd_subject;
+}
+
+public Gd_Subject_Mapping(Gd_Class gdClass, Gd_Subject gdSubject) {
+	// TODO Auto-generated constructor stub
 }
 
 public Gd_Class getGd_class() {

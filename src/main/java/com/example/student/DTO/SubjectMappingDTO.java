@@ -1,48 +1,44 @@
 package com.example.student.DTO;
 
+
 public class SubjectMappingDTO {
-	private int srno;
-    private ClassDetailsDTO gdclass;
-    
-    private SubjectDTO Subject;
-    
-    
+   
+	private int classId;
+    private String className;
+    private int subjectId;
+    private String subjectName;
 
-	public SubjectMappingDTO(int srno, ClassDetailsDTO gdclass, SubjectDTO subject) {
-		super();
-		this.srno = srno;
-		this.gdclass = gdclass;
-		Subject = subject;
-	}
+    // Getters and Setters
+    public int getClassId() {
+        return classId;
+    }
 
-	public int getSrno() {
-		return srno;
-	}
+    public void setClassId(int classId) {
+        this.classId = classId;
+    }
 
-	public void setSrno(int srno) {
-		this.srno = srno;
-	}
+    public String getClassName() {
+        return className;
+    }
 
-	public ClassDetailsDTO getGdclass() {
-		return gdclass;
-	}
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
-	public void setGdclass(ClassDetailsDTO gdclass) {
-		this.gdclass = gdclass;
-	}
+    public int getSubjectId() {
+        return subjectId;
+    }
 
-	public SubjectDTO getSubject() {
-		return Subject;
-	}
+    public void setSubjectId(int subjectId) {
+        this.subjectId = subjectId;
+    }
 
-	public void setSubject(SubjectDTO subject) {
-		Subject = subject;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	
-    
-    
-    
-    
-
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 }
+
