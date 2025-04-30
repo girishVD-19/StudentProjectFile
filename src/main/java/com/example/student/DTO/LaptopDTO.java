@@ -1,36 +1,52 @@
 package com.example.student.DTO;
 
-public class LaptopDTO {
-    private int laptopId;
-    private boolean isAssigned; // True or False
-    private int modelNo;
-    
-    public LaptopDTO() {
-    	
-    }
-	public LaptopDTO(int laptopId, boolean isAssigned, int modelNo) {
-		super();
-		this.laptopId = laptopId;
-		this.isAssigned = isAssigned;
-		this.modelNo = modelNo;
-	}
-	public int getLaptopId() {
-		return laptopId;
-	}
-	public void setLaptopId(int laptopId) {
-		this.laptopId = laptopId;
-	}
-	public boolean isAssigned() {
-		return isAssigned;
-	}
-	public void setAssigned(boolean isAssigned) {
-		this.isAssigned = isAssigned;
-	}
-	public int getModelNo() {
-		return modelNo;
-	}
-	public void setModelNo(int modelNo) {
-		this.modelNo = modelNo;
-	}
+import java.util.List;
 
+public class LaptopDTO {
+	 private Integer laptopId;
+	    private int modelNo;
+	    private boolean assigned;
+	    private List<Integer> studentIds;  
+	    // This will hold the studentDTO with studentId
+	    
+		public LaptopDTO(Integer laptopId, int modelNo, int isAssigned, List<Integer> studentIds) {
+	        this.laptopId = laptopId;
+	        this.modelNo = modelNo;
+	        this.assigned = (isAssigned == 1); // Convert the int value to boolean
+	        this.studentIds = studentIds;  // Initialize studentIds with the provided list
+	    }
+	
+		public LaptopDTO(Integer laptopId,  boolean assigned, int modelNo) {
+			this.laptopId=laptopId;
+			this.assigned=assigned;
+			this.modelNo=modelNo;
+		
+		}
+			
+		public Integer getLaptopId() {
+			return laptopId;
+		}
+		public void setLaptopId(Integer laptopId) {
+			this.laptopId = laptopId;
+		}
+		public int getModelNo() {
+			return modelNo;
+		}
+		public void setModelNo(int modelNo) {
+			this.modelNo = modelNo;
+		}
+		public boolean isAssigned() {
+			return assigned;
+		}
+		public void setAssigned(boolean assigned) {
+			this.assigned = assigned;
+		}
+		public List<Integer> getStudentIds() {
+			return studentIds;
+		}
+		public void setStudentIds(List<Integer> studentIds) {
+			this.studentIds = studentIds;
+		}
+
+	    
 }

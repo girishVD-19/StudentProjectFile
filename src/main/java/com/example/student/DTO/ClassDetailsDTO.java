@@ -15,7 +15,11 @@ public class ClassDetailsDTO {
     
     }
 
-    // Getters and Setters
+    public ClassDetailsDTO(Integer class_ID, String class_NAME) {
+		// TODO Auto-generated constructor stub
+	}
+
+	// Getters and Setters
     public Integer getClassId() {
         return classId;
     }

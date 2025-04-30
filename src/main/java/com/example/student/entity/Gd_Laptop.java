@@ -51,6 +51,10 @@ private List<Gd_Laptop_History> gd_Laptop_History;
 
 
 
+public List<Gd_Student> getGd_student() {
+	return gd_student;
+}
+
 public Integer getLAPTOP_ID() {
 	return LAPTOP_ID;
 }
@@ -82,9 +86,7 @@ public void setIS_ASSIGNED(int iS_ASSIGNED) {
 	IS_ASSIGNED = iS_ASSIGNED;
 }
 
-public List<Gd_Student> getGd_student() {
-	return gd_student;
-}
+
 
 public void setGd_student(List<Gd_Student> gd_Student) {
 	this.gd_student = gd_Student;

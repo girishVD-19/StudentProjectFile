@@ -1,5 +1,7 @@
 package com.example.student.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -16,16 +18,32 @@ public class Gd_Subject_Mapping {
 	
   @ManyToOne
   @JoinColumn(name="CLASS_ID")
+  @JsonIgnore
   private Gd_Class gd_class;
   
   @ManyToOne
   @JoinColumn(name="SUBJECT_ID")
+  @JsonIgnore
   private Gd_Subject gd_subject;
+  
+  public int getSR_NO() {
+	return SR_NO;
+}
 
-public Gd_Subject_Mapping(Gd_Class gd_Class, Gd_Subject gd_Subject) {
+public void setSR_NO(int sR_NO) {
+	SR_NO = sR_NO;
+}
+
+public Gd_Subject_Mapping() {
+	  
+  }
+
+
+public Gd_Subject_Mapping(int sR_NO, Gd_Class gd_class, Gd_Subject gd_subject) {
 	super();
-	this.gd_class = gd_Class;
-	this.gd_subject = gd_Subject;
+	SR_NO = sR_NO;
+	this.gd_class = gd_class;
+	this.gd_subject = gd_subject;
 }
 
 public Gd_Class getGd_class() {

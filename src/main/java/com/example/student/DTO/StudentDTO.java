@@ -17,7 +17,11 @@ public class StudentDTO {
         this.laptopDetails = laptopDetails;
     }
 
-    // Getters and Setters
+    public StudentDTO(int student_ID, String name2, String city2) {
+		// TODO Auto-generated constructor stub
+	}
+
+	// Getters and Setters
     public Integer getRollNo() {
         return rollNo;
     }
