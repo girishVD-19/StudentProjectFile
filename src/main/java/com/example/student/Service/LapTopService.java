@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.LaptopDTO;
-import com.example.student.DTO.StudentDTO;
+
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Student;
 import com.example.student.repository.LapTopRepository;

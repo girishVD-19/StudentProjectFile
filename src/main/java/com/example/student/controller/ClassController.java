@@ -38,11 +38,11 @@ public class ClassController {
 
     @PostMapping("Add")
     public ResponseEntity<ClassDetailsDTO> createClass(
-            @RequestBody ClassDetailsDTO classDto,
-            @RequestParam Integer roomId
+            @RequestBody ClassDetailsDTO classDto
     ) {
-        return new ResponseEntity<>(classservice.createGdClass(classDto, roomId), HttpStatus.CREATED);
+        return new ResponseEntity<>(classservice.createGdClass(classDto, classDto.getRoomId()), HttpStatus.CREATED);
     }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<ClassDetailsDTO> updateClass(
