@@ -23,12 +23,10 @@ public class Gd_Student_Mark {
     private int MARK_ID;
 	
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name="STUDENT_ID")
 	private Gd_Student gd_student;
 	
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name="SUBJECT_ID")
 	private Gd_Subject gd_subject;
 	

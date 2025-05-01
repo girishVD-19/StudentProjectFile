@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,13 +19,13 @@ import com.example.student.Service.RoomsService;
 import com.example.student.entity.Gd_Rooms;
 
 @RestController
-@RequestMapping("/api/rooms")
+@RequestMapping("rooms")
 public class RoomsController {
 	
 	@Autowired
 	private RoomsService roomservice;
 	
-    @GetMapping
+    @GetMapping("All")
     public List<Gd_Rooms> getAllRooms() {
         return roomservice.getAllRooms();
     }
@@ -42,6 +43,20 @@ public class RoomsController {
         Gd_Rooms savedRoom = roomservice.createOrUpdateRoom(room);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRoom);
     }
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity<Gd_Rooms> updateRoomPartial(
+            @PathVariable int id,
+            @RequestBody Gd_Rooms partialRoom) {
+
+        Gd_Rooms updatedRoom = roomservice.updatePartialRoom(id, partialRoom);
+
+        if (updatedRoom == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(updatedRoom);
+    }
 
     // Delete a room by ID
     @DeleteMapping("/{id}")
@@ -49,4 +64,6 @@ public class RoomsController {
     	roomservice.deleteRoom(roomId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    
+    
 }

@@ -32,5 +32,22 @@ public class RoomsService {
     public void deleteRoom(int roomId) {
     	roomrepository.deleteById(roomId);
     }
+    
+    public Gd_Rooms updatePartialRoom(int id, Gd_Rooms partialRoom) {
+        Optional<Gd_Rooms> optionalRoom = roomrepository.findById(id);
+        if (optionalRoom.isEmpty()) {
+            return null;
+        }
+
+        Gd_Rooms existingRoom = optionalRoom.get();
+
+        if (partialRoom.getCapacity() != 0) {
+            existingRoom.setCapacity(partialRoom.getCapacity());
+        }
+
+        // Extend this as needed for other partial updates
+
+        return roomrepository.save(existingRoom);
+    }
 
 }
