@@ -23,6 +23,10 @@ public class Gd_Laptop_History {
 	@JoinColumn(name="LAPTOP_ID")
 	private Gd_Laptop gd_laptop;
 	
+	public Gd_Laptop_History() {
+		
+	}
+	
 	public Gd_Laptop_History(Gd_Laptop gd_laptop, Gd_Student gd_Student, LocalDate aSSIGNED_DATE,
 			LocalDate return_Date) {
 		super();

@@ -1,5 +1,6 @@
 package com.example.student.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Service;
 import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Laptop;
+import com.example.student.entity.Gd_Laptop_History;
 import com.example.student.entity.Gd_Student;
 import com.example.student.repository.ClassRepository;
 import com.example.student.repository.LapTopRepository;
+import com.example.student.repository.LaptopHistoryRepository;
 import com.example.student.repository.StudentRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,6 +30,10 @@ public class StudentService {
 	private LapTopRepository laptoprepository;
 	@Autowired
 	private ClassRepository classrepository;
+	
+	@Autowired
+	private LaptopHistoryRepository laptopHistoryRepository;
+
 	
 	//TO Get data of all student
 	public List<StudentResponseDTO> getAllStudents() {
@@ -114,6 +121,11 @@ public class StudentService {
 		    student.setGd_class(classFromDb);
 		    student.setGd_laptop(existingLaptop);
 		    
+		 // Step: Create Laptop History entry
+		    Gd_Laptop_History history = new Gd_Laptop_History(existingLaptop, savedStudent, LocalDate.now(), null);
+		    laptopHistoryRepository.save(history);
+
+		    
 		    studentrepository.save(student);
 
 		    return "Student added successfully with Roll No: " + rollNo;
@@ -121,59 +133,96 @@ public class StudentService {
 	 
 	//to Update Student 
 	 @Transactional
-	public Gd_Student updateStudent(Integer studentId, Gd_Student student) {
-	    Optional<Gd_Student> existingStudentOpt = studentrepository.findById(studentId);
-	    if (existingStudentOpt.isEmpty()) {
-	        throw new IllegalStateException("Student with ID " + studentId + " does not exist.");
-	    }
+	 public Gd_Student updateStudent(Integer studentId, Gd_Student student) {
+	     Optional<Gd_Student> existingStudentOpt = studentrepository.findById(studentId);
+	     if (existingStudentOpt.isEmpty()) {
+	         throw new IllegalStateException("Student with ID " + studentId + " does not exist.");
+	     }
 
-	    Gd_Student existingStudent = existingStudentOpt.get();
-	    // Handle laptop update only if provided
-	    if (student.getGd_laptop() != null) {
-	        Integer laptopId = student.getGd_laptop().getLAPTOP_ID();
-	        Optional<Gd_Laptop> existingLaptopOpt = laptoprepository.findById(laptopId);
+	     Gd_Student existingStudent = existingStudentOpt.get();
 
-	        if (existingLaptopOpt.isEmpty()) {
-	            throw new IllegalStateException("Laptop with ID " + laptopId + " does not exist.");
-	        }
+	     // Declare laptop outside the block so it's accessible later
+	     Gd_Laptop newLaptop = null;
 
-	        Gd_Laptop laptop = existingLaptopOpt.get();
-	        if (laptop.getIS_ASSIGNED() == 1) {
-	            throw new IllegalStateException("Laptop with ID " + laptopId + " is already assigned.");
-	        }
-	        
-	        Gd_Laptop oldLaptop = existingStudent.getGd_laptop();
-	        if (oldLaptop != null) {
-	            oldLaptop.setIS_ASSIGNED(0);
-	            laptoprepository.save(oldLaptop);
-	        }
+	     if (student.getGd_laptop() != null) {
+	         Integer newLaptopId = student.getGd_laptop().getLAPTOP_ID();
+	         Optional<Gd_Laptop> existingLaptopOpt = laptoprepository.findById(newLaptopId);
 
-	        laptop.setIS_ASSIGNED(1);
-	        laptoprepository.save(laptop);
-	        existingStudent.setGd_laptop(laptop);
-	    }
+	         if (existingLaptopOpt.isEmpty()) {
+	             throw new IllegalStateException("Laptop with ID " + newLaptopId + " does not exist.");
+	         }
 
-	    return studentrepository.save(existingStudent);
-	}
+	         newLaptop = existingLaptopOpt.get();
+
+	         if (newLaptop.getIS_ASSIGNED() == 1) {
+	             throw new IllegalStateException("Laptop with ID " + newLaptopId + " is already assigned.");
+	         }
+
+	         // Unassign old laptop if any
+	         Gd_Laptop oldLaptop = existingStudent.getGd_laptop();
+	         if (oldLaptop != null) {
+	             oldLaptop.setIS_ASSIGNED(0);
+	             laptoprepository.save(oldLaptop);
+	         }
+
+	         // Assign new laptop
+	         newLaptop.setIS_ASSIGNED(1);
+	         laptoprepository.save(newLaptop);
+	         existingStudent.setGd_laptop(newLaptop);
+
+	         // Close existing laptop history (RETURN_DATE)
+	         Optional<Gd_Laptop_History> existingHistoryOpt = laptopHistoryRepository
+	                 .findActiveHistoryByStudentId(existingStudent.getSTUDENT_ID());
+
+	         if (existingHistoryOpt.isPresent()) {
+	             Gd_Laptop_History existingHistory = existingHistoryOpt.get();
+	             existingHistory.setReturn_Date(LocalDate.now());
+	             laptopHistoryRepository.save(existingHistory);
+	         }
+
+	         // Add new history entry for new laptop
+	         Gd_Laptop_History newHistory = new Gd_Laptop_History(
+	                 newLaptop,
+	                 existingStudent,
+	                 LocalDate.now(),
+	                 null
+	         );
+	         laptopHistoryRepository.save(newHistory);
+	     }
+
+	     return studentrepository.save(existingStudent);
+	 }
+
 	 
 	 @Transactional
-	    public String deactivateStudentAndReleaseLaptop(Integer studentId) {
-	        Gd_Student student = studentrepository.findById(studentId)
-	            .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+	 public String deactivateStudentAndReleaseLaptop(Integer studentId) {
+	     Gd_Student student = studentrepository.findById(studentId)
+	         .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
 
-	        // Deactivate the student
-	        student.setActive(false);
+	     // Deactivate the student
+	     student.setActive(false);
 
-	        // Release the laptop if assigned
-	        Gd_Laptop laptop = student.getGd_laptop();
-	        if (laptop != null && laptop.getIS_ASSIGNED() == 1) {
-	            laptop.setIS_ASSIGNED(0);
-	            laptoprepository.save(laptop);
-	        }
+	     // Release the laptop if assigned
+	     Gd_Laptop laptop = student.getGd_laptop();
+	     if (laptop != null && laptop.getIS_ASSIGNED() == 1) {
+	         laptop.setIS_ASSIGNED(0);
+	         laptoprepository.save(laptop);
+	     }
 
-	        studentrepository.save(student);
-	        return "Student deactivated and laptop released successfully.";
+	     // Close active laptop history, if exists
+	     Optional<Gd_Laptop_History> activeHistoryOpt = laptopHistoryRepository
+	         .findActiveHistoryByStudentId(studentId);
+
+	     if (activeHistoryOpt.isPresent()) {
+	         Gd_Laptop_History activeHistory = activeHistoryOpt.get();
+	         activeHistory.setReturn_Date(LocalDate.now());
+	         laptopHistoryRepository.save(activeHistory);
+	     }
+
+	     studentrepository.save(student);
+	     return "Student deactivated, laptop released, and history updated successfully.";
 	 }
+
 	//Delete the student
 	public String deleteStudentById(int id) {
 	    Optional<Gd_Student> optionalStudent = studentrepository.findById(id);

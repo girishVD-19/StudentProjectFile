@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.Service.ClassService;
-import com.example.student.entity.Gd_Class;
 
 @RestController
 @RequestMapping("class")
