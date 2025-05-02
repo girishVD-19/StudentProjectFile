@@ -55,6 +55,4 @@ public class SubjectController {
 	        boolean deleted = subjectservice.deleteSubject(id);
 	        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
 	    }
-	
-
 }

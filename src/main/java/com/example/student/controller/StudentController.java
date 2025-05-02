@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.StudentDTO;
+import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.Service.StudentService;
 import com.example.student.entity.Gd_Student;
 
@@ -26,21 +27,17 @@ public class StudentController {
 	    @Autowired
 	    private StudentService studentService;
 	
-	    @GetMapping("/All")
-	    public ResponseEntity<List<StudentDTO>> getAllStudents() {
-	        List<StudentDTO> students = studentService.getAllStudents();
+	    @GetMapping("All")
+	    public ResponseEntity<List<StudentResponseDTO>> getAllStudents() {
+	        List<StudentResponseDTO> students = studentService.getAllStudents();
 	        return ResponseEntity.ok(students);
 	    }
 
-	@GetMapping("/{id}")
-	public ResponseEntity<StudentDTO> getStudentById(@PathVariable int id) {
-	    try {
-	        StudentDTO studentDTO = studentService.getStudentById(id);
-	        return ResponseEntity.ok(studentDTO);
-	    } catch (NoSuchElementException e) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	    @GetMapping("/{id}")
+	    public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable int id) {
+	        StudentResponseDTO response = studentService.getStudentById(id);
+	        return ResponseEntity.ok(response);
 	    }
-	}
 	@PostMapping("/Add")
     public ResponseEntity<String> addStudent(@RequestBody Gd_Student student) {
         try {

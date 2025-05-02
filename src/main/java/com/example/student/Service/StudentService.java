@@ -11,12 +11,15 @@ import org.springframework.stereotype.Service;
 import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.LaptopDTO;
 import com.example.student.DTO.StudentDTO;
+import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Student;
 import com.example.student.repository.ClassRepository;
 import com.example.student.repository.LapTopRepository;
 import com.example.student.repository.StudentRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class StudentService {
@@ -29,96 +32,50 @@ public class StudentService {
 	private ClassRepository classrepository;
 	
 	//TO Get data of all student
-	public List<StudentDTO> getAllStudents() {
-        // Fetch all students from the repository
-		 List<Gd_Student> students = studentrepository.findAll();
-
-	        // Filter only active students
-	        return students.stream()
-	                .filter(student -> student.isActive())  // Only include active students
-	                .map(student -> {
-	                    Gd_Class gdClass = student.getGd_class();
-	                    ClassDetailsDTO classDetails = null;
-	                    if (gdClass != null) {
-	                        classDetails = new ClassDetailsDTO(
-	                            gdClass.getCLASS_ID(),
-	                            gdClass.getCLASS_NAME(),
-	                            gdClass.getSTD()
-	                        );
-	                    }
-
-	                    Gd_Laptop gdLaptop = student.getGd_laptop();
-	                    LaptopDTO laptopDetails = null;
-	                    if (gdLaptop != null) {
-	                        laptopDetails = new LaptopDTO(
-	                            gdLaptop.getLAPTOP_ID(),
-	                            gdLaptop.getIS_ASSIGNED() == 1,
-	                            gdLaptop.getMODEL_NO()
-	                        );
-	                    }
-
-	                    // Return the mapped StudentDTO
-	                    return new StudentDTO(
-	                        student.getROLL_NO(),
-	                        student.getNAME(),
-	                        student.getCITY(),
-	                        classDetails,
-	                       laptopDetails
-	                    );
-	                })
-	                .collect(Collectors.toList());
+	public List<StudentResponseDTO> getAllStudents() {
+        List<Gd_Student> students = studentrepository.findAll();
+        return students.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 	
-	
    //ToGet Data of particular student data.
-	 public StudentDTO getStudentById(int Id) {
-		 Optional<Gd_Student> optionalStudent = studentrepository.findById(Id);
+	public StudentResponseDTO getStudentById(int studentId) {
+        Gd_Student student = studentrepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
-	        // If the student exists, check if the student is active and then map the details to StudentDTO
-	        if (optionalStudent.isPresent()) {
-	            Gd_Student student = optionalStudent.get();
+        return mapToDTO(student);
+    }
 
-	            // Check if the student is active
-	            if (!student.isActive()) {
-	               return null;
-	            }
-	            // Get the Class details for the student
-	            Gd_Class gdClass = student.getGd_class();
-	            ClassDetailsDTO classDetails = null;
-	            if (gdClass != null) {
-	                classDetails = new ClassDetailsDTO(
-	                    gdClass.getCLASS_ID(),
-	                    gdClass.getCLASS_NAME(),
-	                    gdClass.getSTD()  // Include only classId, className, and std
-	                );
-	            }
+    private StudentResponseDTO mapToDTO(Gd_Student student) {
+        StudentResponseDTO dto = new StudentResponseDTO();
+        dto.setRollNo(student.getROLL_NO());
+        dto.setName(student.getNAME());
+        dto.setCity(student.getCITY());
 
-	            // Get the Laptop details for the student
-	            Gd_Laptop gdLaptop = student.getGd_laptop();
-	            LaptopDTO laptopDetails = null;
-	            if (gdLaptop != null) {
-	                laptopDetails = new LaptopDTO(
-	                    gdLaptop.getLAPTOP_ID(),
-	                    gdLaptop.getIS_ASSIGNED() == 1,
-	                    gdLaptop.getMODEL_NO()
-	                );
-	            }
+        // Class Info
+        Gd_Class gdClass = student.getGd_class();
+        if (gdClass != null) {
+            StudentResponseDTO.ClassInfo classInfo = new StudentResponseDTO.ClassInfo();
+            classInfo.setClassId(gdClass.getCLASS_ID());
+            classInfo.setClassName(gdClass.getCLASS_NAME());
+            classInfo.setStd(gdClass.getSTD());
+            dto.setClassDetails(classInfo);
+        }
 
-	            // Return the StudentDTO containing student, class, and laptop details
-	            return new StudentDTO(
-	                student.getROLL_NO(),
-	                student.getNAME(),
-	                student.getCITY(),
-	                classDetails,  // Class details (including classId, className, and STD)
-	                laptopDetails  // Laptop details (including laptopId, isAssigned, modelNo)
-	            );
-	        } else {
-	            // If student is not found, throw exception
-	            throw new IllegalStateException("Student with ID " + Id + " not found.");
-	        }
-	    }
+        // Laptop Info
+        Gd_Laptop laptop = student.getGd_laptop();
+        if (laptop != null) {
+            StudentResponseDTO.LaptopInfo laptopInfo = new StudentResponseDTO.LaptopInfo();
+            laptopInfo.setLaptopId(laptop.getLAPTOP_ID());
+            dto.setLaptopDetails(laptopInfo);
+        }
+
+        return dto;
+    }
 	    
    //To Add Student
+    @Transactional
 	 public String addStudent(Gd_Student student) {
 		
 		    Gd_Class studentClass = student.getGd_class();
@@ -164,6 +121,7 @@ public class StudentService {
 	    }
 	 
 	//to Update Student 
+	 @Transactional
 	public Gd_Student updateStudent(Integer studentId, Gd_Student student) {
 	    Optional<Gd_Student> existingStudentOpt = studentrepository.findById(studentId);
 	    if (existingStudentOpt.isEmpty()) {

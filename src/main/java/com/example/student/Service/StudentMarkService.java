@@ -7,23 +7,48 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.MarkDTO;
+import com.example.student.DTO.StudentMarkSummaryDTO;
+import com.example.student.entity.Gd_Student;
 import com.example.student.entity.Gd_Student_Mark;
+import com.example.student.entity.Gd_Subject;
 import com.example.student.repository.StudentMarkRepository;
+import com.example.student.repository.StudentRepository;
+import com.example.student.repository.SubjectRepository;
 
 @Service
 public class StudentMarkService {
  
 	@Autowired
     private StudentMarkRepository markRepository;
+	
+	@Autowired
+	private StudentRepository studentrepository;
+	
+	@Autowired
+	private SubjectRepository subjectrepository;
 
-    public Gd_Student_Mark saveStudentMark(Gd_Student_Mark mark) {
-        // Automatically assign remark based on marks
+	public void saveStudentMark(Gd_Student_Mark mark) {
+        // Ensure referenced Gd_Student and Gd_Subject are managed (i.e., loaded from DB)
+        int studentId = mark.getGd_student().getSTUDENT_ID();  // assuming this getter exists
+        int subjectId = mark.getGd_subject().getSUBJECT_ID();  // assuming this getter exists
+
+        Gd_Student student = studentrepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        Gd_Subject subject = subjectrepository.findById(subjectId)
+                .orElseThrow(() -> new RuntimeException("Subject not found with ID: " + subjectId));
+
+        // Set managed references
+        mark.setGd_student(student);
+        mark.setGd_subject(subject);
+        
         if (mark.getMARKS() < 40) {
             mark.setREMARK("Fail");
         } else {
             mark.setREMARK("Pass");
         }
-        return markRepository.save(mark);
+
+        markRepository.save(mark);
     }
     
     public List<Gd_Student_Mark> findAll() {
@@ -59,6 +84,20 @@ public class StudentMarkService {
             mark.getREMARK()
         );
     }
+    
+    public List<StudentMarkSummaryDTO> getMarksByStudentId(int studentId) {
+        List<Gd_Student_Mark> marks = markRepository.findMarksByStudentId(studentId);
+
+        return marks.stream()
+                .map(mark -> new StudentMarkSummaryDTO(
+                        mark.getGd_subject().getSUBJECT_NAME(),   // assuming getter exists
+                        mark.getMARKS(),
+                        mark.getREMARK()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
     public void deleteMarkById(int id) {
         markRepository.deleteById(id);
     }
