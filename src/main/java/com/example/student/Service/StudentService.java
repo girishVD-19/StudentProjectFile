@@ -30,18 +30,21 @@ public class StudentService {
 	
 	//TO Get data of all student
 	public List<StudentResponseDTO> getAllStudents() {
-        List<Gd_Student> students = studentrepository.findAll();
-        return students.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+		List<Gd_Student> students = studentrepository.findAll();
+
+	    return students.stream()
+	            .filter(Gd_Student::isActive) // Only keep active students
+	            .map(this::mapToDTO)
+	            .collect(Collectors.toList());
     }
 	
    //ToGet Data of particular student data.
 	public StudentResponseDTO getStudentById(int studentId) {
-        Gd_Student student = studentrepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+		Gd_Student student = studentrepository.findById(studentId)
+	            .filter(Gd_Student::isActive) // Only allow if isActive == true
+	            .orElseThrow(() -> new IllegalArgumentException("Active student not found with ID: " + studentId));
 
-        return mapToDTO(student);
+	    return mapToDTO(student);
     }
 
     private StudentResponseDTO mapToDTO(Gd_Student student) {
@@ -88,8 +91,7 @@ public class StudentService {
 		   
 		    Integer studentId = savedStudent.getSTUDENT_ID(); 
 		    String rollNo = String.format("%d%d", studentId, classId);
-
-		      
+      
 		    savedStudent.setROLL_NO(Integer.parseInt(rollNo));
 		    student.setActive(true);
 		  
@@ -153,7 +155,25 @@ public class StudentService {
 
 	    return studentrepository.save(existingStudent);
 	}
-	
+	 
+	 @Transactional
+	    public String deactivateStudentAndReleaseLaptop(Integer studentId) {
+	        Gd_Student student = studentrepository.findById(studentId)
+	            .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+	        // Deactivate the student
+	        student.setActive(false);
+
+	        // Release the laptop if assigned
+	        Gd_Laptop laptop = student.getGd_laptop();
+	        if (laptop != null && laptop.getIS_ASSIGNED() == 1) {
+	            laptop.setIS_ASSIGNED(0);
+	            laptoprepository.save(laptop);
+	        }
+
+	        studentrepository.save(student);
+	        return "Student deactivated and laptop released successfully.";
+	 }
 	//Delete the student
 	public String deleteStudentById(int id) {
 	    Optional<Gd_Student> optionalStudent = studentrepository.findById(id);
@@ -174,7 +194,4 @@ public class StudentService {
 	    studentrepository.deleteById(id);
 	    return "Student with ID " + id + " deleted successfully.";
 	}
-
-
-  
 }
