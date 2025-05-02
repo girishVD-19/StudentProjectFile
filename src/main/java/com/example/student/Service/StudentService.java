@@ -8,9 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.student.DTO.ClassDetailsDTO;
-import com.example.student.DTO.LaptopDTO;
-import com.example.student.DTO.StudentDTO;
 import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Laptop;
