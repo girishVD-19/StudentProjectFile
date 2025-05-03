@@ -25,11 +25,7 @@ public class Gd_Student_Mark {
 	@ManyToOne
 	@JoinColumn(name="STUDENT_ID")
 	private Gd_Student gd_student;
-	
-	@ManyToOne
-	@JoinColumn(name="SUBJECT_ID")
-	private Gd_Subject gd_subject;
-	
+
 	@Column
 	private int MARKS;
 	
@@ -40,15 +36,19 @@ public class Gd_Student_Mark {
 	@OneToMany(mappedBy="gd_student_mark" ,cascade=CascadeType.ALL)
 	private List<Gd_Student_History>gd_student_history;
 	
+	@ManyToOne
+	@JoinColumn(name="SR_NO")
+	private Gd_Subject_Mapping gd_subject_mapping;
+	
 	public Gd_Student_Mark() {
 		
 	}
 
-	public Gd_Student_Mark(Gd_Student gd_Student, Gd_Subject gd_Subject, int mARKS, String rEMARK,
+	public Gd_Student_Mark(Gd_Student gd_Student, int mARKS, String rEMARK,
 			List<Gd_Student_History> gd_Student_History) {
 		super();
 		this.gd_student = gd_Student;
-		this.gd_subject = gd_Subject;
+		
 		MARKS = mARKS;
 		REMARK = rEMARK;
 		this.gd_student_history = gd_Student_History;
@@ -70,13 +70,6 @@ public class Gd_Student_Mark {
 		this.gd_student = gd_Student;
 	}
 
-	public Gd_Subject getGd_subject() {
-		return gd_subject;
-	}
-
-	public void setGd_subject(Gd_Subject gd_Subject) {
-		this.gd_subject = gd_Subject;
-	}
 
 	public int getMARKS() {
 		return MARKS;
@@ -104,8 +97,27 @@ public class Gd_Student_Mark {
 
 	@Override
 	public String toString() {
-		return "GD_STUDENT_MARK [MARK_ID=" + MARK_ID + ", gd_student=" + gd_student + ", gd_subject=" + gd_subject
-				+ ", MARKS=" + MARKS + ", REMARK=" + REMARK + ", gd_student_history=" + gd_student_history + "]";
+		return "GD_STUDENT_MARK [MARK_ID=" + MARK_ID + ", gd_student=" + gd_student +
+				 ", MARKS=" + MARKS + ", REMARK=" + REMARK + ", gd_student_history=" + gd_student_history + "]";
+	}
+
+	public Gd_Student_Mark(int mARK_ID, Gd_Student gd_student, int mARKS, String rEMARK,
+			List<Gd_Student_History> gd_student_history, Gd_Subject_Mapping gd_subject_mapping) {
+		super();
+		MARK_ID = mARK_ID;
+		this.gd_student = gd_student;
+		MARKS = mARKS;
+		REMARK = rEMARK;
+		this.gd_student_history = gd_student_history;
+		this.gd_subject_mapping = gd_subject_mapping;
+	}
+
+	public Gd_Subject_Mapping getGd_subject_mapping() {
+		return gd_subject_mapping;
+	}
+
+	public void setGd_subject_mapping(Gd_Subject_Mapping gd_subject_mapping) {
+		this.gd_subject_mapping = gd_subject_mapping;
 	}
 	
 	

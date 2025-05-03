@@ -1,13 +1,17 @@
 package com.example.student.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,6 +32,9 @@ public class Gd_Subject_Mapping {
   @JoinColumn(name="SUBJECT_ID")
   @JsonIgnore
   private Gd_Subject gd_subject;
+  
+  @OneToMany(mappedBy="gd_subject_mapping", cascade= CascadeType.ALL)
+  private List<Gd_Student_Mark> gd_student_mark;
   
   public int getSR_NO() {
 	return SR_NO;

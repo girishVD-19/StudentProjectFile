@@ -18,9 +18,7 @@ public class LaptopHistoryService {
 	public LaptopHistoryService(LaptopHistoryRepository laptopHistoryRepository) {
         this.laptopHistoryRepository = laptopHistoryRepository;
     }
-
     public List<LaptopHistoryDTO> getLaptopHistoryByStudentId(int studentId) {
         return laptopHistoryRepository.findLaptopHistoryByStudentId(studentId);
-	
     }
 }

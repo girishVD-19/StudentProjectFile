@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.MarkDTO;
+import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.DTO.StudentMarkSummaryDTO;
 import com.example.student.Service.StudentMarkService;
 import com.example.student.entity.Gd_Student_Mark;
@@ -24,6 +25,12 @@ public class MarkController {
 	
 	 @Autowired
 	    private StudentMarkService markService;
+	 
+	 @GetMapping("/all")
+	    public ResponseEntity<List<MarkDTO>> getAllMarks() {
+	        List<MarkDTO> marks = markService.getAllMarks();
+	        return ResponseEntity.ok(marks);
+	    }
 	 
 	 @PostMapping("/Add")
 	    public ResponseEntity<String> createMark(@RequestBody Gd_Student_Mark inputMark) {
@@ -36,34 +43,45 @@ public class MarkController {
 	        }
 	    }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<MarkDTO>> getAllMarks() {
-        // Call the service method to get all marks with necessary details
-        List<MarkDTO> responses = markService.getAllMarks();
-
-        // Return the response
-        return ResponseEntity.ok(responses);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<MarkDTO> getMarkById(@PathVariable int id) {
-        MarkDTO response = markService.getMarkById(id);
-        if (response == null) {
+        MarkDTO mark = markService.getMarkById(id);
+        if (mark == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(mark);
     }
     
-    @GetMapping("/Student/{studentId}")
-    public ResponseEntity<List<StudentMarkSummaryDTO>> getStudentMarks(@PathVariable int studentId) {
-        try {
-            List<StudentMarkSummaryDTO> response = markService.getMarksByStudentId(studentId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<MarkDTO>> getMarksByStudentId(@PathVariable int studentId) {
+        List<MarkDTO> marks = markService.getMarksByStudentId(studentId);
+        if (marks.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(marks);
     }
+    
+    @GetMapping("student/{studentId}/class/{classId}")
+    public ResponseEntity<List<MarkDTO>> getMarksByStudentIdAndClassId(
+            @PathVariable int studentId, @PathVariable int classId) {
+        
+        List<MarkDTO> marks = markService.getMarksByStudentIdAndClassId(studentId, classId);
+        
+        if (marks.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(marks);
+    }
+    
 
+    
+    @GetMapping("/{studentId}/{srNo}")
+    public List<StudentMarkDTO> getStudentMarks(@PathVariable int studentId, @PathVariable int srNo) {
+        return markService.getStudentMarks(studentId, srNo);
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMark(@PathVariable int id) {
         markService.deleteMarkById(id);
