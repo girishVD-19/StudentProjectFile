@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -71,9 +72,10 @@ public class Gd_Student {
 	@Column
 	private String CITY;
 	
-	@ManyToOne
-	@JoinColumn(name="LAPTOP_ID")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "LAPTOP_ID", nullable = true)
 	private Gd_Laptop gd_laptop;
+
 	
 	@OneToMany(mappedBy="gd_student", cascade=CascadeType.ALL)
 	private List<Gd_Student_Mark> gd_student_mark;

@@ -63,6 +63,12 @@ public class StudentController {
         String message = studentService.deactivateStudentAndReleaseLaptop(studentId);
         return ResponseEntity.ok(message);
     }
+	
+	@PatchMapping("/{id}/activate")
+	public ResponseEntity<String> activateStudent(@PathVariable("id") Integer id) {
+	    String result = studentService.activateStudentAndUpdateStatus(id);
+	    return ResponseEntity.ok(result);
+	}
 	@DeleteMapping("/Delete/{id}")
 	public ResponseEntity<String> deleteStudent(@PathVariable int id) {
 	    try {

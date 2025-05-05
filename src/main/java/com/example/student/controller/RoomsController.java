@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.student.DTO.RoomDTO;
 import com.example.student.Service.RoomsService;
 import com.example.student.entity.Gd_Rooms;
 
@@ -31,11 +32,12 @@ public class RoomsController {
     }
 
     // Get a room by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Gd_Rooms> getRoomById(@PathVariable("id") int roomId) {
-        Optional<Gd_Rooms> room = roomservice.getRoomById(roomId);
-        return room.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    @GetMapping("/{roomId}")
+    public ResponseEntity<List<RoomDTO>> getRoomWithClasses(@PathVariable Integer roomId) {
+        List<RoomDTO> roomDetails = roomservice.getRoomWithClasses(roomId);
+        return ResponseEntity.ok(roomDetails);
     }
+
 
     // Create or update a room
     @PostMapping("Add")

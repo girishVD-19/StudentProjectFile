@@ -3,6 +3,7 @@ package com.example.student.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.LaptopDTO;
+import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.Service.LapTopService;
 
 @RestController
@@ -22,17 +24,21 @@ public class LapTopController {
 	    private LapTopService laptopService;
 
 	    // GET all laptops
-	    @GetMapping("All")
-	    public ResponseEntity<List<LaptopDTO>> getAllLaptops() {
-	        List<LaptopDTO> laptops = laptopService.getAllLaptops();
-	        return ResponseEntity.ok(laptops);
+	 @GetMapping("all")
+	    public ResponseEntity<List<LaptopdetailsDTO>> getAllLaptopDetails() {
+	        List<LaptopdetailsDTO> laptopDetailsList = laptopService.getAllLaptopDetails();
+	        if (laptopDetailsList != null && !laptopDetailsList.isEmpty()) {
+	            return ResponseEntity.ok(laptopDetailsList);
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+	        }
 	    }
 
 	    // GET a laptop by ID
-	    @GetMapping("/{id}")
-	    public ResponseEntity<LaptopDTO> getLaptopById(@PathVariable Integer id) {
-	        LaptopDTO laptop = laptopService.getLaptopById(id);
-	        return ResponseEntity.ok(laptop);
+	    @GetMapping("/{laptopId}")
+	    public ResponseEntity<LaptopdetailsDTO> getLaptopDetails(@PathVariable Integer laptopId) {
+	        LaptopdetailsDTO laptopDetails = laptopService.getLaptopDetails(laptopId);
+	        return ResponseEntity.ok(laptopDetails);
 	    }
 
 	    // POST a new laptop

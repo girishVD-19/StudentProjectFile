@@ -202,11 +202,14 @@ public class StudentService {
 	     // Deactivate the student
 	     student.setActive(false);
 
-	     // Release the laptop if assigned
+	     // Release the laptop i
 	     Gd_Laptop laptop = student.getGd_laptop();
 	     if (laptop != null && laptop.getIS_ASSIGNED() == 1) {
 	         laptop.setIS_ASSIGNED(0);
 	         laptoprepository.save(laptop);
+
+	         // Set the laptop_id to null for the deactivated student
+	         student.setGd_laptop(null);
 	     }
 
 	     // Close active laptop history, if exists
@@ -221,6 +224,38 @@ public class StudentService {
 
 	     studentrepository.save(student);
 	     return "Student deactivated, laptop released, and history updated successfully.";
+	 }
+
+	 @Transactional
+	 public String activateStudentAndUpdateStatus(Integer studentId) {
+	     Gd_Student student = studentrepository.findById(studentId)
+	         .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + studentId));
+
+	     if (student.isActive()) {
+	         return "Student is already active.";
+	     }
+
+	     // Activate the student
+	     student.setActive(true);
+
+	     // Reassign laptop if it exists and is currently unassigned
+	     Gd_Laptop laptop = student.getGd_laptop();
+	     if (laptop != null && laptop.getIS_ASSIGNED() == 0) {
+	         laptop.setIS_ASSIGNED(1);
+	         laptoprepository.save(laptop);
+
+	         // Create a new laptop history record
+	         Gd_Laptop_History newHistory = new Gd_Laptop_History();
+	         newHistory.setGd_student(student);
+	         newHistory.setGd_laptop(laptop);
+	         newHistory.setASSIGNED_DATE(LocalDate.now());
+	         newHistory.setReturn_Date(null); // still active
+
+	         laptopHistoryRepository.save(newHistory);
+	     }
+
+	     studentrepository.save(student);
+	     return "Student activated. Laptop reassigned and history created (if applicable).";
 	 }
 
 	//Delete the student
@@ -239,7 +274,6 @@ public class StudentService {
 	        laptop.setIS_ASSIGNED(0); // Mark laptop as available
 	        laptoprepository.save(laptop);
 	    }
-
 	    studentrepository.deleteById(id);
 	    return "Student with ID " + id + " deleted successfully.";
 	}

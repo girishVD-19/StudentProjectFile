@@ -30,17 +30,30 @@ public class ClassController {
         return ResponseEntity.ok(classservice.getAllGdClasses());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ClassDetailsDTO> getClassById(@PathVariable Integer id) {
-        return ResponseEntity.ok(classservice.getGdClass(id));
-    }
+	 @GetMapping("{classId}")
+	    public ResponseEntity<ClassDetailsDTO> getClassDetails(@PathVariable Integer classId) {
+	        try {
+	            ClassDetailsDTO classDetails = classservice.getClassDetails(classId);  // Call service method to fetch data
+
+	            if (classDetails == null) {
+	                // If class not found, return a 404 Not Found response
+	                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	            }
+
+	            return new ResponseEntity<>(classDetails, HttpStatus.OK);  // Return class details with HTTP status 200 OK
+	        } catch (Exception e) {
+	            // If any exception occurs, return 500 Internal Server Error
+	            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    }
 
     @PostMapping("Add")
-    public ResponseEntity<ClassDetailsDTO> createClass(
-            @RequestBody ClassDetailsDTO classDto
-    ) {
-        return new ResponseEntity<>(classservice.createGdClass(classDto, classDto.getRoomId()), HttpStatus.CREATED);
+    public ResponseEntity<String> createGdClass(@RequestBody ClassDetailsDTO dto) {
+        String message = classservice.createGdClass(dto);
+        return ResponseEntity.ok(message);
     }
+
+
 
 
     @PatchMapping("/{id}")

@@ -1,14 +1,60 @@
 package com.example.student.DTO;
 
+import java.util.List;
+
 public class ClassDetailsDTO {
+	
 	
 	private Integer classId;
     private String className;
     private String std;
     private Integer roomId;
     private Integer roomCapacity;
+    private List<SubjectDTOS> subjects; 
     
-    public ClassDetailsDTO() {
+    public static class SubjectDTOS {
+        private Integer id;
+        private String name;
+        
+        
+		public Integer getId() {
+			return id;
+		}
+		public SubjectDTOS(Integer id, String name) {
+			super();
+			this.id = id;
+			this.name = name;
+		}
+		public SubjectDTOS() {
+			// TODO Auto-generated constructor stub
+		}
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+        
+        
+
+        // Getters and setters
+    }
+    
+    public ClassDetailsDTO(Integer classId, String className, String std, Integer roomId, Integer roomCapacity,
+			List<SubjectDTOS> subjects) {
+		super();
+		this.classId = classId;
+		this.className = className;
+		this.std = std;
+		this.roomId = roomId;
+		this.roomCapacity = roomCapacity;
+		this.subjects = subjects;
+	}
+
+	public ClassDetailsDTO() {
     	
     }
 
@@ -42,4 +88,14 @@ public class ClassDetailsDTO {
 
     public Integer getRoomCapacity() { return roomCapacity; }
     public void setRoomCapacity(Integer roomCapacity) { this.roomCapacity = roomCapacity; }
+
+	public List<SubjectDTOS> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(List<SubjectDTOS> subjects) {
+		this.subjects = subjects;
+	}
+    
+    
 }
