@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.MarkDTO;
 import com.example.student.DTO.StudentMarkDTO;
-import com.example.student.DTO.StudentMarkSummaryDTO;
 import com.example.student.Service.StudentMarkService;
 import com.example.student.entity.Gd_Student_Mark;
 

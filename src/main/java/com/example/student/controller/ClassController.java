@@ -55,8 +55,6 @@ public class ClassController {
     }
 
 
-
-
     @PatchMapping("/{id}")
     public ResponseEntity<ClassDetailsDTO> updateClass(
             @PathVariable Integer id,
