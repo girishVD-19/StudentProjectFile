@@ -73,9 +73,7 @@ public class MarkController {
         
         return ResponseEntity.ok(marks);
     }
-    
-
-    
+      
     @GetMapping("/{studentId}/{srNo}")
     public List<StudentMarkDTO> getStudentMarks(@PathVariable int studentId, @PathVariable int srNo) {
         return markService.getStudentMarks(studentId, srNo);

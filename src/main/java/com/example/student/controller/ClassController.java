@@ -53,8 +53,7 @@ public class ClassController {
         String message = classservice.createGdClass(dto);
         return ResponseEntity.ok(message);
     }
-
-
+    
     @PatchMapping("/{id}")
     public ResponseEntity<ClassDetailsDTO> updateClass(
             @PathVariable Integer id,
