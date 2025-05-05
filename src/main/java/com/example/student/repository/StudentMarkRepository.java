@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.entity.Gd_Student_Mark;
 
 public interface StudentMarkRepository extends JpaRepository<Gd_Student_Mark,Integer> {
