@@ -1,8 +1,10 @@
 package com.example.student.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,16 +51,39 @@ public class ClassService {
 
 
 
-	public List<ClassDetailsDTO> getAllGdClasses() {
-	    return classrepository.findAll().stream()
-	            .map(c -> new ClassDetailsDTO(
-	                    c.getCLASS_ID(),
-	                    c.getCLASS_NAME(),
-	                    c.getSTD(),
-	                    c.getGd_roooms().getRoom_Id(),
-	                    c.getGd_roooms().getCapacity()))
-	            .collect(Collectors.toList());
+	public List<ClassDetailsDTO> getAllClassDetails() {
+	    // Fetch all class details with room and subjects
+	    List<Object[]> results = classrepository.findAllClassDetailsWithRoomAndSubjects();
+
+
+	    HashMap<Integer, ClassDetailsDTO> classDetailsMap = new HashMap<>();
+
+	    for (Object[] result : results) {
+	        Integer classId = (Integer) result[0];
+
+	        // If we haven't created DTO for this class yet, create and store it
+	        ClassDetailsDTO dto = classDetailsMap.get(classId);
+	        if (dto == null) {
+	            dto = new ClassDetailsDTO();
+	            dto.setClassId(classId);
+	            dto.setClassName((String) result[1]);
+	            dto.setStd((String) result[2]);
+	            dto.setRoomId((Integer) result[3]);
+	            dto.setRoomCapacity((Integer) result[4]);
+	            dto.setSubjects(new ArrayList<>());
+	            classDetailsMap.put(classId, dto);
+	        }
+
+	        // Add subject to the class's subject list
+	        SubjectDTOS subjectDTO = new SubjectDTOS();
+	        subjectDTO.setId((Integer) result[5]);
+	        subjectDTO.setName((String) result[6]);
+	        dto.getSubjects().add(subjectDTO);
+	    }
+
+	    return new ArrayList<>(classDetailsMap.values());
 	}
+
 	
 	public ClassDetailsDTO getClassDetails(Integer classId) {
         // Fetch the class details with room and subjects from the repository

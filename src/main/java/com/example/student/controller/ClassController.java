@@ -26,8 +26,9 @@ public class ClassController {
 	private ClassService classservice;
 	
 	@GetMapping("All")
-    public ResponseEntity<List<ClassDetailsDTO>> getAllClasses() {
-        return ResponseEntity.ok(classservice.getAllGdClasses());
+	public ResponseEntity<List<ClassDetailsDTO>> getAllClassDetails() {
+        List<ClassDetailsDTO> classDetailsList = classservice.getAllClassDetails();
+        return new ResponseEntity<>(classDetailsList, HttpStatus.OK);
     }
 
 	 @GetMapping("{classId}")
