@@ -3,6 +3,9 @@ package com.example.student.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.ClassDetailsDTO;
+import com.example.student.DTO.ClassResponseDTO;
+import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.Service.ClassService;
 
 @RestController
@@ -25,11 +30,19 @@ public class ClassController {
 	@Autowired
 	private ClassService classservice;
 	
-	@GetMapping("All")
-	public ResponseEntity<List<ClassDetailsDTO>> getAllClassDetails() {
-        List<ClassDetailsDTO> classDetailsList = classservice.getAllClassDetails();
-        return new ResponseEntity<>(classDetailsList, HttpStatus.OK);
-    }
+	@GetMapping("/All")
+	public ResponseEntity<ClassResponseDTO> getAllClassDetails(
+	        @RequestParam(defaultValue = "1") Integer pageNo,
+	        @RequestParam(defaultValue = "10") Integer pageSize) {
+
+	    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // PageRequest is zero-indexed
+
+	    // Call service to fetch all class details with pagination
+	    ClassResponseDTO response = classservice.getAllClassDetails(pageable);
+
+	    return ResponseEntity.ok(response);
+	}
+
 
 	 @GetMapping("{classId}")
 	    public ResponseEntity<ClassDetailsDTO> getClassDetails(@PathVariable Integer classId) {
@@ -47,13 +60,24 @@ public class ClassController {
 	            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	        }
 	    }
+        
+	 @GetMapping("/{classId}/details")
+	    public ResponseEntity<ClassWithStudentDTO> getClassDetailsWithStudent(@PathVariable Integer classId) {
+	        ClassWithStudentDTO classDetails = classservice.getClassWithStudents(classId);
+	        return ResponseEntity.ok(classDetails);
+	 }
+	 
+	 @PostMapping("/Add")
+	 public ResponseEntity<String> createGdClass(@RequestBody ClassDetailsDTO dto) {
+	     try {
+	         String message = classservice.createGdClass(dto);
+	         return ResponseEntity.ok(message);
+	     } catch (Exception e) {
+	         return ResponseEntity.badRequest().body("Cannot create class: duplicate or invalid data.");
+	     }
+	 }
 
-    @PostMapping("Add")
-    public ResponseEntity<String> createGdClass(@RequestBody ClassDetailsDTO dto) {
-        String message = classservice.createGdClass(dto);
-        return ResponseEntity.ok(message);
-    }
-    
+
     @PatchMapping("/{id}")
     public ResponseEntity<ClassDetailsDTO> updateClass(
             @PathVariable Integer id,

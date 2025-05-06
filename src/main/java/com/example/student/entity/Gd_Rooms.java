@@ -19,13 +19,31 @@ public class Gd_Rooms {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-    private int Room_Id;
+    private int ROOM_ID;
 	
 	@Column(name="CAPACITY")
 	private int Capacity;
 	
-	@JsonIgnore
-	@OneToMany(mappedBy="gd_rooms" , cascade=CascadeType.ALL)
+	@Column(name="IS_ACTIVE")
+	private boolean is_active;
+	
+	public Gd_Rooms(int capacity, boolean is_active, List<Gd_Class> gd_class) {
+		super();
+		Capacity = capacity;
+		this.is_active = is_active;
+		this.gd_class = gd_class;
+	}
+
+	public boolean isIs_active() {
+		return is_active;
+	}
+
+	public void setIs_active(boolean is_active) {
+		this.is_active = is_active;
+	}
+	
+   @JsonIgnore
+	@OneToMany(mappedBy="gd_rooms")
 	private List<Gd_Class> gd_class;
 	
 	public Gd_Rooms() {
@@ -39,11 +57,11 @@ public class Gd_Rooms {
 	}
 
 	public int getRoom_Id() {
-		return Room_Id;
+		return ROOM_ID;
 	}
 
 	public void setRoom_Id(int rOOM_ID) {
-		Room_Id = rOOM_ID;
+		ROOM_ID = rOOM_ID;
 	}
 
 	public int getCapacity() {
@@ -63,7 +81,7 @@ public class Gd_Rooms {
 
 	@Override
 	public String toString() {
-		return "GD_ROOMS [ROOM_ID=" + Room_Id + ", CAPACITY=" + Capacity + ", gd_class=" + gd_class + "]";
+		return "GD_ROOMS [ROOM_ID=" + ROOM_ID + ", CAPACITY=" + Capacity + ", gd_class=" + gd_class + "]";
 	}
 	
 	

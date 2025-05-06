@@ -1,21 +1,29 @@
 package com.example.student.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.ClassDetailsDTO.SubjectDTOS;
+import com.example.student.DTO.ClassResponseDTO;
+import com.example.student.DTO.ClassWithStudentDTO;
+import com.example.student.DTO.StudentListResponseDTO;
 import com.example.student.DTO.SubjectDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
@@ -48,41 +56,70 @@ public class ClassService {
 	    Gd_Class saved = classrepository.save(gdClass);
 	    return "Class created with ID: " + saved.getCLASS_ID();
 	}
+     
+	
+	public ClassWithStudentDTO getClassWithStudents(Integer classId) {
+        Gd_Class gdClass = classrepository.findById(classId)
+            .orElseThrow(() -> new IllegalArgumentException("Class not found with ID: " + classId));
 
+        ClassWithStudentDTO dto = new ClassWithStudentDTO();
+        dto.setClassId(gdClass.getCLASS_ID());
+        dto.setClassName(gdClass.getCLASS_NAME());
+        dto.setStd(gdClass.getSTD());
 
+       
+        // Map students
+        List<ClassWithStudentDTO.StudentDTOS> studentDTOs = gdClass.getGd_student().stream()
+            .map(student -> {
+                ClassWithStudentDTO.StudentDTOS s = new ClassWithStudentDTO.StudentDTOS();
+                s.setStudentId(student.getSTUDENT_ID());
+                s.setStudentName(student.getNAME());
+                s.setRollNo(student.getROLL_NO());
+                return s;
+            }).collect(Collectors.toList());
 
-	public List<ClassDetailsDTO> getAllClassDetails() {
-	    // Fetch all class details with room and subjects
-	    List<Object[]> results = classrepository.findAllClassDetailsWithRoomAndSubjects();
+        dto.setStudent(studentDTOs);
+        return dto;
+    }
+	public ClassResponseDTO getAllClassDetails(Pageable pageable) {
+	    // Fetch paginated data from the repository
+	    Page<Object[]> results = classrepository.findAllClassDetailsWithRoomAndSubjects(pageable);
 
-
-	    HashMap<Integer, ClassDetailsDTO> classDetailsMap = new HashMap<>();
+	    // Convert the results into a List of ClassDetailsDTO
+	    List<ClassDetailsDTO> classDetails = new ArrayList<>();
 
 	    for (Object[] result : results) {
-	        Integer classId = (Integer) result[0];
+	        ClassDetailsDTO dto = new ClassDetailsDTO();
+	        dto.setClassId((Integer) result[0]);
+	        dto.setClassName((String) result[1]);
+	        dto.setStd((String) result[2]);
+	        dto.setRoomId((Integer) result[3]);
+	        dto.setRoomCapacity((Integer) result[4]);
 
-	        // If we haven't created DTO for this class yet, create and store it
-	        ClassDetailsDTO dto = classDetailsMap.get(classId);
-	        if (dto == null) {
-	            dto = new ClassDetailsDTO();
-	            dto.setClassId(classId);
-	            dto.setClassName((String) result[1]);
-	            dto.setStd((String) result[2]);
-	            dto.setRoomId((Integer) result[3]);
-	            dto.setRoomCapacity((Integer) result[4]);
-	            dto.setSubjects(new ArrayList<>());
-	            classDetailsMap.put(classId, dto);
-	        }
-
-	        // Add subject to the class's subject list
+	        // Add subjects to the DTO
 	        SubjectDTOS subjectDTO = new SubjectDTOS();
 	        subjectDTO.setId((Integer) result[5]);
 	        subjectDTO.setName((String) result[6]);
-	        dto.getSubjects().add(subjectDTO);
+	        dto.setSubjects(Collections.singletonList(subjectDTO));
+
+	        classDetails.add(dto);
 	    }
 
-	    return new ArrayList<>(classDetailsMap.values());
+	    // Create the response DTO with pagination metadata
+	    ClassResponseDTO response = new ClassResponseDTO();
+	    response.setContent(classDetails);
+	    response.setTotalElements(results.getTotalElements());
+	    response.setTotalPages(results.getTotalPages());
+	    response.setPageNumber(results.getNumber()+1);
+	    response.setPageSize(results.getSize());
+
+	    return response;
 	}
+
+
+	
+
+	    
 
 	
 	public ClassDetailsDTO getClassDetails(Integer classId) {

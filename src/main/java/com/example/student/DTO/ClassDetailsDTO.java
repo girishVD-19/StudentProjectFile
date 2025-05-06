@@ -10,7 +10,9 @@ public class ClassDetailsDTO {
     private String std;
     private Integer roomId;
     private Integer roomCapacity;
-    private List<SubjectDTOS> subjects; 
+    private List<SubjectDTOS> subjects;
+    
+   
     
     public static class SubjectDTOS {
         private Integer id;
@@ -57,8 +59,12 @@ public class ClassDetailsDTO {
 	public ClassDetailsDTO() {
     	
     }
+	
+	
 
-    public ClassDetailsDTO(Integer classId, String className, String std, Integer roomId, Integer roomCapacity) {
+   
+
+	public ClassDetailsDTO(Integer classId, String className, String std, Integer roomId, Integer roomCapacity) {
         this.classId = classId;
         this.className = className;
         this.std = std;
@@ -96,6 +102,7 @@ public class ClassDetailsDTO {
 	public void setSubjects(List<SubjectDTOS> subjects) {
 		this.subjects = subjects;
 	}
+
     
     
 }

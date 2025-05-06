@@ -3,6 +3,7 @@ package com.example.student.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,9 +44,16 @@ public class LapTopController {
 
 	    // POST a new laptop
 	    @PostMapping("Add")
-	    public ResponseEntity<LaptopDTO> saveLaptop(@RequestBody LaptopDTO dto) {
-	        LaptopDTO savedLaptop = laptopService.saveLaptop(dto);
-	        return ResponseEntity.ok(savedLaptop);
+	    public ResponseEntity<?> saveLaptop(@RequestBody LaptopDTO dto) {
+	        try {
+	            LaptopDTO savedLaptop = laptopService.saveLaptop(dto);
+	            return ResponseEntity.ok(savedLaptop);
+	        } catch (DataIntegrityViolationException e) {
+	            return ResponseEntity.badRequest().body("Laptop with this model number already exists.");
+	        } catch (Exception e) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                    .body("Failed to save laptop. Please check the data and try again.");
+	        }
 	    }
 
 }

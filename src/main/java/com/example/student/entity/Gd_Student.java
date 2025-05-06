@@ -65,7 +65,7 @@ public class Gd_Student {
 
 
 	@ManyToOne
-	@JoinColumn(name="CLASS_ID")
+	@JoinColumn(name="CLASS_ID",nullable=true)
 	private Gd_Class gd_class;
 	
 
@@ -77,10 +77,10 @@ public class Gd_Student {
 	private Gd_Laptop gd_laptop;
 
 	
-	@OneToMany(mappedBy="gd_student", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="gd_student", cascade=CascadeType.ALL,orphanRemoval=true)
 	private List<Gd_Student_Mark> gd_student_mark;
 
-	@OneToMany(mappedBy="gd_student", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="gd_student", cascade=CascadeType.ALL,orphanRemoval=true)
 	private List<Gd_Laptop_History> gd_laptop_history;
 
 	public int getSTUDENT_ID() {

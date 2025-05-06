@@ -156,15 +156,6 @@ public class StudentMarkService {
         }
         return dtos;
     }
-
-
-   
-    
-
-    
-
-
-
     public void deleteMarkById(int id) {
         markRepository.deleteById(id);
     }

@@ -22,15 +22,26 @@ public class Gd_Laptop {
 	@JsonProperty("laptopId")
     private Integer LAPTOP_ID;
 	
-	@Column
+	@Column(unique=true)
 	@JsonProperty("modelNo")
 	private int MODEL_NO;
 
 
-	@Column
+	@Column(name="IS_ASSIGNED")
 	private int IS_ASSIGNED;
+	
+	@Column(name="IS_ALIVE")
+	private boolean IS_ALIVE;
 
 	
+public boolean isIS_ALIVE() {
+		return IS_ALIVE;
+	}
+
+	public void setIS_ALIVE(boolean iS_ALIVE) {
+		IS_ALIVE = iS_ALIVE;
+	}
+
 public int getMODEL_NO() {
 		return MODEL_NO;
 	}
@@ -64,11 +75,14 @@ public Gd_Laptop() {
 }
 
 
-public Gd_Laptop(int mODEL_NO, int iS_ASSIGNED, List<Gd_Student> gd_student,
+
+
+public Gd_Laptop(int mODEL_NO, int iS_ASSIGNED, boolean iS_ALIVE, List<Gd_Student> gd_student,
 		List<Gd_Laptop_History> gd_Laptop_History) {
 	super();
 	MODEL_NO = mODEL_NO;
 	IS_ASSIGNED = iS_ASSIGNED;
+	IS_ALIVE = iS_ALIVE;
 	this.gd_student = gd_student;
 	this.gd_Laptop_History = gd_Laptop_History;
 }
@@ -112,6 +126,5 @@ public String toString() {
 	return "Gd_Laptop [LAPTOP_ID=" + LAPTOP_ID + ", MODEL_NO=" + MODEL_NO + ", IS_ASSIGNED=" + IS_ASSIGNED
 			+ ", gd_student=" + gd_student + ", gd_Laptop_History=" + gd_Laptop_History + "]";
 }
-
 
 }

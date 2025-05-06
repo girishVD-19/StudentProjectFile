@@ -33,13 +33,13 @@ public class Gd_Class {
 	
 
 	@ManyToOne
-	@JoinColumn(name="ROOM_ID")
+	@JoinColumn(name="ROOM_ID", nullable = true)
 	private Gd_Rooms gd_rooms;
 	
-	@OneToMany(mappedBy="gd_class", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="gd_class", cascade = CascadeType.ALL,orphanRemoval=true)
 	private List<Gd_Student> gd_Student;
 	
-	@OneToMany(mappedBy="gd_class", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy="gd_class", cascade = CascadeType.ALL, orphanRemoval=true)
 	private List<Gd_Subject_Mapping> gd_Subject_Mapping;
 	
 	public Gd_Class() {

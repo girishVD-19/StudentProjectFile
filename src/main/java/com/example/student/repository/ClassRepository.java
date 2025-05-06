@@ -2,6 +2,8 @@ package com.example.student.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,8 +27,9 @@ List<Object[]> findClassDetailsWithRoomAndSubjects(@Param("classId") Integer cla
         "FROM GD_CLASS c " +
         "LEFT JOIN GD_ROOMS r ON r.ROOM_ID = c.ROOM_ID " +
         "LEFT JOIN GD_SUBJECT_MAPPTING sm ON sm.CLASS_ID = c.CLASS_ID " +
-        "LEFT JOIN GD_SUBJECT s ON sm.SUBJECT_ID = s.SUBJECT_ID",
-nativeQuery = true)
-List<Object[]> findAllClassDetailsWithRoomAndSubjects();
+        "LEFT JOIN GD_SUBJECT s ON sm.SUBJECT_ID = s.SUBJECT_ID", nativeQuery = true)
+Page<Object[]> findAllClassDetailsWithRoomAndSubjects(Pageable pageable);
+
+
 
 }
