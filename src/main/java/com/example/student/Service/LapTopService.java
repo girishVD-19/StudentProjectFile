@@ -9,9 +9,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.LaptopDTO;
+import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Student;
@@ -26,8 +29,11 @@ public class LapTopService {
 	    private LapTopRepository laptopRepository;
 
 	
-	 public List<LaptopdetailsDTO> getAllLaptopDetails() {
-		    List<Object[]> results = laptopRepository.findAllLaptopDetailsWithStudentAndHistory();
+	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable) {
+		    // Fetch paginated data from the repository
+		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithStudentAndHistory(pageable);
+
+		    // List to hold the final laptop details DTOs
 		    List<LaptopdetailsDTO> laptopDetailsList = new ArrayList<>();
 		    Map<Integer, LaptopdetailsDTO> laptopDetailsMap = new HashMap<>();
 		    Set<Integer> studentIds = new HashSet<>();
@@ -43,6 +49,8 @@ public class LapTopService {
 		            dto.setLaptopId(laptopId);
 		            dto.setModelNo((Integer) row[1]);
 		            dto.setIsAssigned((Integer) row[2]);
+		            dto.setStudents(new ArrayList<>());  // Initialize the students list
+		            dto.setHistories(new ArrayList<>()); // Initialize the histories list
 		            laptopDetailsMap.put(laptopId, dto);
 		            laptopDetailsList.add(dto);  // Add to list only once
 		        }
@@ -57,7 +65,7 @@ public class LapTopService {
 		            studentIds.add(studentId);
 		        }
 
-		        // Add history record (only latest history if needed)
+		        // Add history record
 		        LaptopdetailsDTO.HistoryDTO history = new LaptopdetailsDTO.HistoryDTO();
 		        history.setHistoryId((Integer) row[5]);
 
@@ -73,8 +81,6 @@ public class LapTopService {
 		        java.sql.Date returnDate = (java.sql.Date) row[7];
 		        if (returnDate != null) {
 		            history.setReturnDate(returnDate.toLocalDate());
-		            // Only include studentId in history if returnDate is not null
-		          
 		        } else {
 		            history.setReturnDate(null);
 		        }
@@ -82,8 +88,17 @@ public class LapTopService {
 		        dto.getHistories().add(history);
 		    }
 
-		    return laptopDetailsList;
+		    // Create the response with pagination metadata
+		    LaptopListResponseDTO response = new LaptopListResponseDTO();
+		    response.setContent(laptopDetailsList);  // List of laptop details DTOs
+		    response.setTotalElements(results.getTotalElements());
+		    response.setTotalPages(results.getTotalPages());
+		    response.setPageNumber(results.getNumber() + 1);  // Adjust page number to start from 1
+		    response.setPageSize(results.getSize());
+
+		    return response;
 		}
+
         
 	 public LaptopdetailsDTO getLaptopDetails(Integer laptopId) {
 		    List<Object[]> results = laptopRepository.findLaptopDetailsWithStudentAndRecentHistory(laptopId);

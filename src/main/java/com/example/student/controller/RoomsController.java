@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
 import com.example.student.Service.RoomsService;
 import com.example.student.entity.Gd_Rooms;
@@ -26,10 +29,12 @@ public class RoomsController {
 	@Autowired
 	private RoomsService roomservice;
 	
-    @GetMapping("All")
-    public List<Gd_Rooms> getAllRooms() {
-        return roomservice.getAllRooms();
-    }
+	@GetMapping("/")
+	public ResponseEntity<PageSortDTO<Gd_Rooms>> getAllRooms(Pageable pageable) {
+	    PageSortDTO<Gd_Rooms> rooms = roomservice.getAllRooms(pageable);
+	    return ResponseEntity.ok(rooms);
+	}
+
 
     // Get a room by ID
     @GetMapping("/{roomId}")

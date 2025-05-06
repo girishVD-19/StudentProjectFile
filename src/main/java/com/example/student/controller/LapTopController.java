@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.LaptopDTO;
+import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.Service.LapTopService;
 
@@ -25,15 +29,24 @@ public class LapTopController {
 	    private LapTopService laptopService;
 
 	    // GET all laptops
-	 @GetMapping("all")
-	    public ResponseEntity<List<LaptopdetailsDTO>> getAllLaptopDetails() {
-	        List<LaptopdetailsDTO> laptopDetailsList = laptopService.getAllLaptopDetails();
-	        if (laptopDetailsList != null && !laptopDetailsList.isEmpty()) {
-	            return ResponseEntity.ok(laptopDetailsList);
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-	        }
-	    }
+	 @RestController
+	 @RequestMapping("/laptop")
+	 public class LaptopController {
+
+	     @Autowired
+	     private LapTopService laptopService;
+
+	     @GetMapping("/all")
+	     public ResponseEntity<LaptopListResponseDTO> getAllLaptops(
+	             @RequestParam(defaultValue = "1") int pageNo,
+	             @RequestParam(defaultValue = "10") int pageSize) {
+
+	         Pageable pageable = PageRequest.of(pageNo - 1, pageSize);  // Adjust for 1-based page number
+	         LaptopListResponseDTO response = laptopService.getAllLaptopDetails(pageable);
+	         return ResponseEntity.ok(response);
+	     }
+	 }
+
 
 	    // GET a laptop by ID
 	    @GetMapping("/{laptopId}")

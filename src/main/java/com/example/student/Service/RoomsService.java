@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
 import com.example.student.entity.Gd_Rooms;
 import com.example.student.repository.RoomRepository;
@@ -18,9 +21,19 @@ public class RoomsService {
 	
 	@Autowired
 	private RoomRepository roomrepository;
-	public List<Gd_Rooms> getAllRooms() {
-        return roomrepository.findAll();
-    }
+	public PageSortDTO<Gd_Rooms> getAllRooms(Pageable pageable) {
+	    Page<Gd_Rooms> roomsPage = roomrepository.findAll(pageable);
+
+	    // Create pagination details with only the three required fields
+	    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
+	            roomsPage.getPageable().getPageNumber(),
+	            roomsPage.getTotalPages(),
+	            (int) roomsPage.getTotalElements()
+	    );
+
+	    return new PageSortDTO<>(roomsPage.getContent(), paginationDetails);
+	}
+
 
     // Get a room by its ID
     public Optional<Gd_Rooms> getRoomById(int roomId) {

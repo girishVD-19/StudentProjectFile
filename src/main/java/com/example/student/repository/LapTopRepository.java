@@ -2,6 +2,8 @@ package com.example.student.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,7 +39,7 @@ public interface LapTopRepository extends JpaRepository<Gd_Laptop,Integer> {
 	        + "    FROM GD_LAPTOP_HISTORY"
 	        + ") h ON h.LAPTOP_ID = l.LAPTOP_ID AND h.rn = 1 "
 	        + "ORDER BY l.LAPTOP_ID", nativeQuery = true) 
-	List<Object[]> findAllLaptopDetailsWithStudentAndHistory();
+	Page<Object[]> findAllLaptopDetailsWithStudentAndHistory(Pageable pageable);
 
 	
 
