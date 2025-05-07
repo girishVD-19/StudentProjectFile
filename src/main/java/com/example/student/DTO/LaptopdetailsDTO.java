@@ -14,7 +14,6 @@ public class LaptopdetailsDTO {
 
     
     
-    
     public LaptopdetailsDTO() {
 		super();
 		this.laptopId = laptopId;

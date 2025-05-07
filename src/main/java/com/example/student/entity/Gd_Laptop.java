@@ -34,7 +34,7 @@ public class Gd_Laptop {
 	private boolean IS_ALIVE;
 
 	
-public boolean isIS_ALIVE() {
+public boolean getIS_ALIVE() {
 		return IS_ALIVE;
 	}
 

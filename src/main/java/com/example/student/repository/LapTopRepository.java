@@ -41,7 +41,8 @@ public interface LapTopRepository extends JpaRepository<Gd_Laptop,Integer> {
 	        + "ORDER BY l.LAPTOP_ID", nativeQuery = true) 
 	Page<Object[]> findAllLaptopDetailsWithStudentAndHistory(Pageable pageable);
 
-	
+	@Query(value = "SELECT CASE WHEN EXISTS (SELECT 1 FROM GD_LAPTOP WHERE MODEL_NO = :modelNo) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END", nativeQuery = true)
+	boolean existsByModelNo(@Param("modelNo") int modelNo);
 
 
 

@@ -1,24 +1,31 @@
 package com.example.student.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.student.DTO.LaptopDTO;
 import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.entity.Gd_Laptop;
+import com.example.student.entity.Gd_Laptop_History;
 import com.example.student.entity.Gd_Student;
 import com.example.student.repository.LapTopRepository;
+import com.example.student.repository.LaptopHistoryRepository;
+import com.example.student.repository.StudentRepository;
 
 
 
@@ -27,6 +34,12 @@ public class LapTopService {
 
 	 @Autowired
 	    private LapTopRepository laptopRepository;
+	 
+	 @Autowired
+	 private StudentRepository studentrepository;
+	 
+	 @Autowired
+	 private LaptopHistoryRepository laptophistoryrepository;
 
 	
 	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable) {
@@ -140,33 +153,117 @@ public class LapTopService {
 
 		    return dto;
 		}
-
-
-
-	    public LaptopDTO saveLaptop(LaptopDTO dto) {
-	        Gd_Laptop laptop = new Gd_Laptop();
-	        laptop.setMODEL_NO(dto.getModelNo());
-	        laptop.setIS_ASSIGNED(0); 
-	        Gd_Laptop saved = laptopRepository.save(laptop);
-	        return mapToDTO(saved);
-	    }
-
-	    private LaptopDTO mapToDTO(Gd_Laptop laptop) {
-	        List<Integer> studentIds = new ArrayList<>();
-
-	        // If students are assigned to the laptop, include their IDs
-	        if (laptop.getGd_student() != null) {
-	            for (Gd_Student student : laptop.getGd_student()) {
-	                studentIds.add(student.getSTUDENT_ID());  // Get the student ID
+	 
+	 public LaptopDTO saveLaptop(LaptopDTO dto) {
+		 try {
+	            // Check if a laptop with the same modelNo already exists
+	            if (laptopRepository.existsByModelNo(dto.getModelNo())) {
+	                throw new DataIntegrityViolationException("Laptop with this model number already exists.");
 	            }
+
+	            // Convert DTO to entity
+	            Gd_Laptop laptop = new Gd_Laptop();
+	            laptop.setLAPTOP_ID(dto.getLaptopId());
+	            laptop.setMODEL_NO(dto.getModelNo());
+	            laptop.setIS_ALIVE(true);
+	            laptop.setIS_ASSIGNED(dto.isAssigned() ? 1 : 0); // Convert boolean to int (1 or 0)
+
+	            // If the laptop is assigned, associate the students
+	            if (dto.isAssigned()) {
+	                List<Gd_Student> students = studentrepository.findAllById(dto.getStudentIds());
+	                laptop.setGd_student(students); // Assuming the relation is 'gd_student'
+	            }
+
+	            // Save the laptop entity
+	            laptop = laptopRepository.save(laptop);
+
+	            // Convert the saved entity back to DTO
+	            LaptopDTO savedLaptopDTO = new LaptopDTO();
+	            savedLaptopDTO.setLaptopId(laptop.getLAPTOP_ID());
+	            savedLaptopDTO.setModelNo(laptop.getMODEL_NO());
+	            savedLaptopDTO.setAssigned(laptop.getIS_ASSIGNED() == 1); // Convert int back to boolean
+
+	            // Return the saved LaptopDTO
+	            return savedLaptopDTO;
+
+	        } catch (DataIntegrityViolationException e) {
+	            // Handle case when modelNo already exists
+	            throw new IllegalArgumentException("Laptop with this model number already exists.", e);
+	        } catch (Exception e) {
+	            // Handle other exceptions
+	            throw new RuntimeException("Failed to save laptop. Please check the data and try again.", e);
+	        }
+	    }
+	
+	       
+
+	 @Transactional
+	    public String assignLaptopToStudent(Integer laptopId, Integer studentId) {
+	        // 1. Check if the laptop exists
+	        Optional<Gd_Laptop> laptopOptional = laptopRepository.findById(laptopId);
+	        if (!laptopOptional.isPresent()) {
+	            return "Laptop not found";
 	        }
 
-	        return new LaptopDTO(
-	                laptop.getLAPTOP_ID(),
-	                laptop.getMODEL_NO(),
-	                laptop.getIS_ASSIGNED(),
-	                studentIds  // Pass list of studentIds
-	        );
+	        Gd_Laptop laptop = laptopOptional.get();
+	        
+	        if(laptop.getIS_ALIVE()==false) {
+	        	return "Laptop is not Alive";
+	        }
+
+	        // 2. Check if the laptop is already assigned
+	        if (laptop.getIS_ASSIGNED() == 1) {
+	            return "Laptop is already assigned";
+	        }
+
+	        // 3. Get the student from the database
+	        Optional<Gd_Student> studentOptional = studentrepository.findById(studentId);
+	        if (!studentOptional.isPresent()) {
+	            return "Student not found";
+	        }
+
+	        Gd_Student student = studentOptional.get();
+	        
+	        Gd_Laptop oldLaptop = student.getGd_laptop();
+	        if (oldLaptop != null) {
+	            oldLaptop.setIS_ASSIGNED(0);               // Mark old laptop as unassigned
+	            laptopRepository.save(oldLaptop);          // Save change to DB
+	        }
+
+	        // 4. Assign the laptop to the student
+	        laptop.setIS_ASSIGNED(1); // Set IS_ASSIGNED to 1
+
+	        // Add the laptop to the student's list of laptops (if not already present)
+	        if (student.getGd_laptop() == null) {
+	            student.setGd_laptop_history(new ArrayList<>());
+	        }
+	        student.setGd_laptop(laptop); // Properly assign the laptop to the student
+// Associate the laptop with the student\
+	        
+	        Gd_Laptop_History lastAssignedHistory = laptophistoryrepository
+	                .findLatestAssignedLaptopHistory(studentId, oldLaptop.getLAPTOP_ID());
+	        if (lastAssignedHistory != null) {
+	            lastAssignedHistory.setReturn_Date(LocalDate.now());
+	            laptophistoryrepository.save(lastAssignedHistory);
+	        }
+	    
+
+	        
+	      
+
+	        // 5. Create a new laptop history record for the assignment
+	        Gd_Laptop_History history = new Gd_Laptop_History();
+	        history.setGd_laptop(laptop);
+	        history.setGd_student(student);
+	        history.setASSIGNED_DATE(LocalDate.now()); // Use the current date as the assigned date
+	        history.setReturn_Date(null); // Set the return date as null for now (the laptop is assigned)
+	        laptophistoryrepository.save(history); // Save the history record
+
+	        // 6. Save the updated student and laptop
+	        studentrepository.save(student);  // Save the student
+	        laptopRepository.save(laptop);    // Save the laptop
+
+	        return "Laptop assigned to student successfully";
 	    }
 
 }

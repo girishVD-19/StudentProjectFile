@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,6 +67,18 @@ public class LapTopController {
 	        } catch (Exception e) {
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                    .body("Failed to save laptop. Please check the data and try again.");
+	        }
+	    }
+	    @PatchMapping("/assign/laptopId/{laptopId}/studentId/{studentId}")
+	    public ResponseEntity<String> assignLaptopToStudent(@PathVariable Integer laptopId, @PathVariable Integer studentId){
+
+	        // Call the service method to assign the laptop
+	        String response = laptopService.assignLaptopToStudent(laptopId, studentId);
+	        
+	        if (response.equals("Laptop assigned to student successfully")) {
+	            return ResponseEntity.ok(response);  // Return success response
+	        } else {
+	            return ResponseEntity.badRequest().body(response);  // Return failure response
 	        }
 	    }
 

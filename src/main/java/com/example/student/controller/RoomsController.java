@@ -64,6 +64,19 @@ public class RoomsController {
 
         return ResponseEntity.ok(updatedRoom);
     }
+    
+    @PatchMapping("/{roomId}/deactivate")
+    public ResponseEntity<String> deactivateRoomAndUnlinkClass(@PathVariable Integer roomId) {
+        try {
+            roomservice.deactivateRoom(roomId);
+            return ResponseEntity.ok("Room deactivated and class unlinked successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("An unexpected error occurred.");
+        }
+    }
 
     // Delete a room by ID
     @DeleteMapping("/{id}")
@@ -71,6 +84,4 @@ public class RoomsController {
     	roomservice.deleteRoom(roomId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    
-    
 }

@@ -134,6 +134,10 @@ public class StudentService {
 		    Integer laptopId = gdLaptop.getLAPTOP_ID();
 		    Gd_Laptop existingLaptop = laptoprepository.findById(laptopId)
 		            .orElseThrow(() -> new IllegalArgumentException("Laptop with ID " + laptopId + " does not exist."));
+		    
+		    if(existingLaptop.getIS_ALIVE()==false) {
+		    	 throw new IllegalArgumentException("Laptop with ID " + laptopId + " is not alive.");
+		    }
 
 		    if (existingLaptop.getIS_ASSIGNED() == 1) {
 		        throw new IllegalArgumentException("Laptop with ID " + laptopId + " is already assigned.");
@@ -171,7 +175,6 @@ public class StudentService {
                 throw new IllegalArgumentException("Invalid action: " + action);
         }
     }
-
 	 
 	//to Update Student 
 	 @Transactional

@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
+import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
+import com.example.student.repository.ClassRepository;
 import com.example.student.repository.RoomRepository;
 
 @Service
@@ -21,6 +23,9 @@ public class RoomsService {
 	
 	@Autowired
 	private RoomRepository roomrepository;
+	
+	@Autowired
+	private ClassRepository classrepository;
 	public PageSortDTO<Gd_Rooms> getAllRooms(Pageable pageable) {
 	    Page<Gd_Rooms> roomsPage = roomrepository.findAll(pageable);
 
@@ -59,6 +64,23 @@ public class RoomsService {
         }
         return new ArrayList<>(roomMap.values());
     }
+    
+    public void deactivateRoom(Integer roomId) {
+    	
+    	Gd_Rooms room = roomrepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+		 room.setIs_active(false);
+		    roomrepository.save(room);
+		    
+		    
+		    Gd_Class gdClass = classrepository.findById(roomId)
+		            .orElseThrow(() -> new RuntimeException("Class not found for this room"));
+		    
+		    gdClass.setGd_roooms(null);
+		    classrepository.save(gdClass);
+	}
+
 
     // Delete a room by its ID
     public void deleteRoom(int roomId) {

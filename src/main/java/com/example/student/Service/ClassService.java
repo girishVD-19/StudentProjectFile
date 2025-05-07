@@ -51,6 +51,12 @@ public class ClassService {
 	    Gd_Class gdClass = new Gd_Class();
 	    gdClass.setCLASS_NAME(dto.getClassName());
 	    gdClass.setSTD(dto.getStd());
+	    
+	   if( room.isIs_active()== true)
+	   {
+		   return "Room is already assign";
+	   }
+	   room.setIs_active(true);
 	    gdClass.setGd_roooms(room);
 
 	    Gd_Class saved = classrepository.save(gdClass);
@@ -70,13 +76,16 @@ public class ClassService {
        
         // Map students
         List<ClassWithStudentDTO.StudentDTOS> studentDTOs = gdClass.getGd_student().stream()
-            .map(student -> {
-                ClassWithStudentDTO.StudentDTOS s = new ClassWithStudentDTO.StudentDTOS();
-                s.setStudentId(student.getSTUDENT_ID());
-                s.setStudentName(student.getNAME());
-                s.setRollNo(student.getROLL_NO());
-                return s;
-            }).collect(Collectors.toList());
+        	    .filter(student -> student.isActive()) // or student.getIsActive() == true, depending on your method
+        	    .map(student -> {
+        	        ClassWithStudentDTO.StudentDTOS s = new ClassWithStudentDTO.StudentDTOS();
+        	        s.setStudentId(student.getSTUDENT_ID());
+        	        s.setStudentName(student.getNAME());
+        	        s.setRollNo(student.getROLL_NO());
+        	        return s;
+        	    })
+        	    .collect(Collectors.toList());
+
 
         dto.setStudent(studentDTOs);
         return dto;
