@@ -18,8 +18,6 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -59,7 +57,6 @@ public class AuthController {
                                  .body(new JWTResponse("Invalid username or password"));
         }
     }
-
     // 🆕 REGISTER endpoint
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JWTRequest request) {
