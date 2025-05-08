@@ -39,7 +39,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // 🔐 LOGIN endpoint
+    //  LOGIN endpoint
     @PostMapping("/login")
     public ResponseEntity<JWTResponse> login(@RequestBody JWTRequest request) {
         try {
@@ -57,7 +57,7 @@ public class AuthController {
                                  .body(new JWTResponse("Invalid username or password"));
         }
     }
-    // 🆕 REGISTER endpoint
+    //User Register 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JWTRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -67,13 +67,12 @@ public class AuthController {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        // Default role — make dynamic if needed
 
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
     }
-
-    // 🚪 LOGOUT endpoint (optional: add token blacklist if needed)
+    
+    //Logout Feature
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -96,8 +95,7 @@ public class AuthController {
             throw new BadCredentialsException("Invalid username or password");
         }
     }
-
- 
+    
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException() {
         return new ResponseEntity<>("Invalid username or password!", HttpStatus.UNAUTHORIZED);
