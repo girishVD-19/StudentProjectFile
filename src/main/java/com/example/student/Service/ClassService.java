@@ -63,7 +63,6 @@ public class ClassService {
 	    return "Class created with ID: " + saved.getCLASS_ID();
 	}
      
-	
 	public ClassWithStudentDTO getClassWithStudents(Integer classId) {
         Gd_Class gdClass = classrepository.findById(classId)
             .orElseThrow(() -> new IllegalArgumentException("Class not found with ID: " + classId));
@@ -128,8 +127,7 @@ public class ClassService {
 
 	
 
-	    
-
+	
 	
 	public ClassDetailsDTO getClassDetails(Integer classId) {
         // Fetch the class details with room and subjects from the repository
