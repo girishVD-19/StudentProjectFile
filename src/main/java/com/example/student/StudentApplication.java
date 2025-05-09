@@ -1,4 +1,4 @@
-package com.example.student;
+package com.example.student; 
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,4 +9,3 @@ public class StudentApplication {
 		SpringApplication.run(StudentApplication.class, args);
 	}
 } 
-

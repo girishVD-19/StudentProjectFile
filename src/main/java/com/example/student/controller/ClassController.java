@@ -36,7 +36,7 @@ public class ClassController {
 			summary="To Get the data of a Whole Class" ,
 			description="To Get the data of a Whole Class"
 			)
-	@GetMapping("/All")
+	@GetMapping("/")
 	public ResponseEntity<ClassResponseDTO> getAllClassDetails(
 	        @RequestParam(defaultValue = "1") Integer pageNo,
 	        @RequestParam(defaultValue = "10") Integer pageSize) {
