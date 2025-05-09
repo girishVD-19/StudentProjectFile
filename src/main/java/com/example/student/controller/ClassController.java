@@ -23,6 +23,8 @@ import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.Service.ClassService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("class")
 public class ClassController {
@@ -30,6 +32,10 @@ public class ClassController {
 	@Autowired
 	private ClassService classservice;
 	
+	@Operation(
+			summary="To Get the data of a Whole Class" ,
+			description="To Get the data of a Whole Class"
+			)
 	@GetMapping("/All")
 	public ResponseEntity<ClassResponseDTO> getAllClassDetails(
 	        @RequestParam(defaultValue = "1") Integer pageNo,
@@ -43,7 +49,10 @@ public class ClassController {
 	    return ResponseEntity.ok(response);
 	}
 
-
+     @Operation(
+    		 summary="To Get Details of the Specific Class Id",
+    		 description="To get the details of the Specific Class Id"
+    		 )
 	 @GetMapping("{classId}")
 	    public ResponseEntity<ClassDetailsDTO> getClassDetails(@PathVariable Integer classId) {
 	        try {
@@ -61,12 +70,20 @@ public class ClassController {
 	        }
 	    }
         
+     @Operation(
+    		 summary="To Get Details of the Students with Class",
+    		 description="To Get Details of the Students with Class"
+    		 )
 	 @GetMapping("/{classId}/details")
 	    public ResponseEntity<ClassWithStudentDTO> getClassDetailsWithStudent(@PathVariable Integer classId) {
 	        ClassWithStudentDTO classDetails = classservice.getClassWithStudents(classId);
 	        return ResponseEntity.ok(classDetails);
 	 }
 	 
+     @Operation(
+    		 summary="To Add the Class Data.",
+    		 description="To Send the class Details to  the DataBase."
+               ) 
 	 @PostMapping("/Add")
 	 public ResponseEntity<String> createGdClass(@RequestBody ClassDetailsDTO dto) {
 	     try {
@@ -77,7 +94,10 @@ public class ClassController {
 	     }
 	 }
 
-
+     @Operation(
+    		 summary="To Update the Class Details.",
+    		 description="To Update the Class Details With the given class id."
+               ) 
     @PatchMapping("/{id}")
     public ResponseEntity<ClassDetailsDTO> updateClass(
             @PathVariable Integer id,
@@ -88,6 +108,10 @@ public class ClassController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+   		 summary="To delete the Class Details.",
+   		 description="To delete the Class Details With the given class id."
+              ) 
     public ResponseEntity<Void> deleteClass(@PathVariable Integer id) {
         classservice.deleteGdClass(id);
         return ResponseEntity.noContent().build();

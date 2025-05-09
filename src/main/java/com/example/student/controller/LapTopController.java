@@ -22,6 +22,8 @@ import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.Service.LapTopService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("laptop")
 public class LapTopController {
@@ -37,7 +39,11 @@ public class LapTopController {
 	     @Autowired
 	     private LapTopService laptopService;
 
-	     @GetMapping("/all")
+	     @GetMapping("/")
+	     @Operation(
+	    		 summary="To Get the All Laptop Details",
+	    		 description="To Get the All Laptop Details"
+	    		 )
 	     public ResponseEntity<LaptopListResponseDTO> getAllLaptops(
 	             @RequestParam(defaultValue = "1") int pageNo,
 	             @RequestParam(defaultValue = "10") int pageSize) {
@@ -50,6 +56,10 @@ public class LapTopController {
 
 
 	    // GET a laptop by ID
+	 @Operation(
+    		 summary="To Get the All Laptop detail by Id",
+    		 description="To Get the All Detail by Id"
+    		 )
 	    @GetMapping("/{laptopId}")
 	    public ResponseEntity<LaptopdetailsDTO> getLaptopDetails(@PathVariable Integer laptopId) {
 	        LaptopdetailsDTO laptopDetails = laptopService.getLaptopDetails(laptopId);
@@ -57,6 +67,10 @@ public class LapTopController {
 	    }
 
 	    // POST a new laptop
+	 @Operation(
+			 summary="To add the All Laptop detail",
+    		 description="To Add the All Detail"
+			 )
 	    @PostMapping("Add")
 	    public ResponseEntity<?> saveLaptop(@RequestBody LaptopDTO dto) {
 	        try {
@@ -69,6 +83,10 @@ public class LapTopController {
 	                    .body("Failed to save laptop. Please check the data and try again.");
 	        }
 	    }
+	 @Operation(
+			 summary="To Assign Laptop to student",
+			 description="To Assign Laptop to student"
+			 )
 	    @PatchMapping("/assign/laptopId/{laptopId}/studentId/{studentId}")
 	    public ResponseEntity<String> assignLaptopToStudent(@PathVariable Integer laptopId, @PathVariable Integer studentId){
 

@@ -47,9 +47,8 @@ public class StudentResponseDTO {
 
     public LaptopInfo getLaptopDetails() { return laptopDetails; }
     public void setLaptopDetails(LaptopInfo laptopDetails) { this.laptopDetails = laptopDetails; }
-	public void setClassDetails(ClassDetailsDTO classDetails2) {
-		// TODO Auto-generated method stub
-		
-	}
+//	public void setClassDetails(ClassDetailsDTO classDetails2) {
+//		
+//	}
 
 }

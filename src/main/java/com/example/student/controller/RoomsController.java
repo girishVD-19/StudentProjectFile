@@ -22,6 +22,8 @@ import com.example.student.DTO.RoomDTO;
 import com.example.student.Service.RoomsService;
 import com.example.student.entity.Gd_Rooms;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("rooms")
 public class RoomsController {
@@ -30,6 +32,9 @@ public class RoomsController {
 	private RoomsService roomservice;
 	
 	@GetMapping("/")
+	@Operation(summary="To Get all the data Of Rooms",
+	description="To Get all the of Rooms"
+	)
 	public ResponseEntity<PageSortDTO<Gd_Rooms>> getAllRooms(Pageable pageable) {
 	    PageSortDTO<Gd_Rooms> rooms = roomservice.getAllRooms(pageable);
 	    return ResponseEntity.ok(rooms);
@@ -38,6 +43,9 @@ public class RoomsController {
 
     // Get a room by ID
     @GetMapping("/{roomId}")
+    @Operation(summary="To Get all the data Of Rooms",
+	description="To Get all the of Rooms"
+	)
     public ResponseEntity<List<RoomDTO>> getRoomWithClasses(@PathVariable Integer roomId) {
         List<RoomDTO> roomDetails = roomservice.getRoomWithClasses(roomId);
         return ResponseEntity.ok(roomDetails);
@@ -46,12 +54,20 @@ public class RoomsController {
 
     // Create or update a room
     @PostMapping("Add")
+    @Operation(
+    		summary="To Send data of Rooms",
+    		description="To Send Data of Room And add TO database"
+    		)   
     public ResponseEntity<Gd_Rooms> createOrUpdateRoom(@RequestBody Gd_Rooms room) {
         Gd_Rooms savedRoom = roomservice.createOrUpdateRoom(room);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRoom);
     }
     
     @PatchMapping("/{id}")
+    @Operation(
+    		summary="To Send data of Rooms",
+    		description="To Send Data of Room And add TO database"
+    		)
     public ResponseEntity<Gd_Rooms> updateRoomPartial(
             @PathVariable int id,
             @RequestBody Gd_Rooms partialRoom) {
@@ -66,6 +82,10 @@ public class RoomsController {
     }
     
     @PatchMapping("/{roomId}/deactivate")
+    @Operation(
+    		summary="To Deactivate the room",
+    		description="To Deactivate the room"
+    		)
     public ResponseEntity<String> deactivateRoomAndUnlinkClass(@PathVariable Integer roomId) {
         try {
             roomservice.deactivateRoom(roomId);
@@ -80,6 +100,10 @@ public class RoomsController {
 
     // Delete a room by ID
     @DeleteMapping("/{id}")
+    @Operation(
+    		summary="To Delete the room",
+    		description="To Delete the room"
+    		)
     public ResponseEntity<Void> deleteRoom(@PathVariable("id") int roomId) {
     	roomservice.deleteRoom(roomId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

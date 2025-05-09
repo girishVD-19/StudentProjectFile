@@ -23,6 +23,8 @@ import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.Service.StudentService;
 import com.example.student.entity.Gd_Student;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequestMapping("/Student")
@@ -30,7 +32,12 @@ public class StudentController {
 	    
 	    @Autowired
 	    private StudentService studentService;
-	    @GetMapping("/All")
+	    
+	    @Operation(
+	    		summary="To Get All Details of the Students",
+	    		description="To Get All Details of the Students"
+	    		)
+	    @GetMapping("/")
 	    public ResponseEntity<StudentListResponseDTO> getAllStudents(
 	            @RequestParam(required = false) String name,
 	            @RequestParam(required = false) String city,
@@ -40,12 +47,21 @@ public class StudentController {
 	        return ResponseEntity.ok(response);
 	    }
 
-
+	    @Operation(
+	    		summary="To Get All Details of specific student",
+	    		description="To Get All Details of specific student"
+	    		)
 	    @GetMapping("/{id}")
 	    public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable int id) {
 	        StudentResponseDTO response = studentService.getStudentById(id);
 	        return ResponseEntity.ok(response);
 	    }
+	    
+	    
+	    @Operation(
+	    		summary="To Add all the Student data",
+	    		description="To Add all the Student data"
+	    		)   
 	@PostMapping("/Add")
     public ResponseEntity<String> addStudent(@RequestBody Gd_Student student) {
         try {
@@ -58,6 +74,10 @@ public class StudentController {
         }
     }
 	
+	    @Operation(
+	    		summary="To manage the Updations",
+	    		description="To Manage 1.Update Operation 2.Activate Operation 3.Deactivate Operation"
+	    		)
 	@PutMapping("/manage/{studentId}")
 	public ResponseEntity<?> manageStudent(
 	        @PathVariable Integer studentId,
@@ -67,7 +87,13 @@ public class StudentController {
 	    Object result = studentService.manageStudent(studentId, student, action);
 	    return ResponseEntity.ok(result);
 	}
+	    
+	    
 
+	 @Operation(
+			 summary="To Delete Record",
+	    		description="To Delete Record"
+			 )
 	@DeleteMapping("/Delete/{id}")
 	public ResponseEntity<String> deleteStudent(@PathVariable int id) {
 	    try {
