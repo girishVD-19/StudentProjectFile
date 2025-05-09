@@ -59,11 +59,6 @@ public class ClassDetailsDTO {
 	public ClassDetailsDTO() {
     	
     }
-	
-	
-
-   
-
 	public ClassDetailsDTO(Integer classId, String className, String std, Integer roomId, Integer roomCapacity) {
         this.classId = classId;
         this.className = className;

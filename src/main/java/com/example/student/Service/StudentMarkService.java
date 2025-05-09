@@ -27,12 +27,7 @@ public class StudentMarkService {
 	@Autowired
 	private StudentRepository studentrepository;
 	
-	@Autowired
-	private SubjectRepository subjectrepository;
 	
-	@Autowired
-	private StudentMarkRepository SMrepository;
-
 	public void saveStudentMark(Gd_Student_Mark mark) {
         // Ensure referenced Gd_Student and Gd_Subject are managed (i.e., loaded from DB)
         int studentId = mark.getGd_student().getSTUDENT_ID();  // assuming this getter exists

@@ -27,7 +27,7 @@ public class MarkController {
 	 @Autowired
 	    private StudentMarkService markService;
 	 
-	 @GetMapping("/all")
+	 @GetMapping("/")
 	 @Operation(
 			 summary="To Get All Marks of Table",
 			 description="To Get All Marks of Table"

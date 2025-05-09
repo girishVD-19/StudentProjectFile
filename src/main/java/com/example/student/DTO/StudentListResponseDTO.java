@@ -22,8 +22,5 @@ public class StudentListResponseDTO {
 		public void setPageInfo(PageInfoDTO pageInfo) {
 			this.pageInfo = pageInfo;
 		}
-	    
-	    
-	    
 
 }

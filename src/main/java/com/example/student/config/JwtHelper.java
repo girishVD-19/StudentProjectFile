@@ -30,9 +30,6 @@ public class JwtHelper {
     private String secretKey;
     
     private Key key;
-    
-   
-
  
     public String getSecretKey() {
 		return secretKey;
@@ -125,5 +122,3 @@ public class JwtHelper {
     }
 
 }
-
-

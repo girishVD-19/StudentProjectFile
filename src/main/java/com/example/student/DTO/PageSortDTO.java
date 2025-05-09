@@ -22,8 +22,7 @@ public class PageSortDTO<T> {
 	            this.pageNumber = pageNumber;
 	            this.totalPages = totalPages;
 	            this.totalElements = totalElements;
-	            
-	            
+	                      
 	        }
 
 			public int getPageNumber() {
@@ -66,5 +65,4 @@ public class PageSortDTO<T> {
 		public void setPaginationDetails(PaginationDetails paginationDetails) {
 			this.paginationDetails = paginationDetails;
 		}
-    
 }
