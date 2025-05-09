@@ -24,6 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+    
+    @Autowired
+    private  BlacklistToken tokenBlacklist;
+
+    public JwtAuthenticationFilter(BlacklistToken tokenBlacklist) {
+        this.tokenBlacklist = tokenBlacklist;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,6 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 logger.error("Error parsing JWT token", e);  // Log the error
             }
+        }
+        
+        if (jwtToken != null && tokenBlacklist.isBlacklisted(jwtToken)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is blacklisted");
+            return;
         }
  
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

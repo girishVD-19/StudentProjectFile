@@ -8,9 +8,7 @@ public class PageInfoDTO {
 	    
 		public PageInfoDTO() {
 			super();
-			this.totalRecords = totalRecords;
-			this.currentPageNo = currentPageNo;
-			this.pageSize = pageSize;
+			
 		}
 		public Long getTotalRecords() {
 			return totalRecords;

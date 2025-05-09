@@ -2,6 +2,7 @@ package com.example.student.controller;
 
 import com.example.student.DTO.JWTRequest;
 import com.example.student.DTO.JWTResponse;
+import com.example.student.config.BlacklistToken;
 import com.example.student.config.JwtHelper;
 import com.example.student.entity.User;
 import com.example.student.repository.UserRepository;
@@ -39,6 +40,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private  BlacklistToken blacklisttoken;
 
     //  LOGIN endpoint
     @Operation(summary="To Login the user")
@@ -75,6 +79,11 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
     
+    public AuthController(BlacklistToken tokenBlacklist) {
+        this.blacklisttoken = tokenBlacklist;
+    }
+
+    
     //Logout Feature
     @Operation(summary="to Logout form the system")
     @PostMapping("/logout")
@@ -83,6 +92,8 @@ public class AuthController {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
+            
+            blacklisttoken.blacklist(token);
            
             logger.info("Logout requested for token: {}", token);
         }

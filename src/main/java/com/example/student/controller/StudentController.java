@@ -1,7 +1,7 @@
 package com.example.student.controller;
 
 
-import java.util.List;
+
 import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,7 +36,7 @@ public class StudentController {
 	    		summary="To Get All Details of the Students",
 	    		description="To Get All Details of the Students"
 	    		)
-	    @GetMapping("/")
+	    @GetMapping("/all")
 	    public ResponseEntity<StudentListResponseDTO> getAllStudents(
 	            @RequestParam(required = false) String name,
 	            @RequestParam(required = false) String city,
