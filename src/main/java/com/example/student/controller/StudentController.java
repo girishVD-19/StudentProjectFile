@@ -36,7 +36,7 @@ public class StudentController {
 	    		summary="To Get All Details of the Students",
 	    		description="To Get All Details of the Students"
 	    		)
-	    @GetMapping("/all")
+	    @GetMapping("/")
 	    public ResponseEntity<StudentListResponseDTO> getAllStudents(
 	            @RequestParam(required = false) String name,
 	            @RequestParam(required = false) String city,
