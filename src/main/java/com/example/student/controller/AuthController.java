@@ -6,6 +6,7 @@ import com.example.student.config.JwtHelper;
 import com.example.student.entity.User;
 import com.example.student.repository.UserRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     //  LOGIN endpoint
+    @Operation(summary="To Login the user")
     @PostMapping("/login")
     public ResponseEntity<JWTResponse> login(@RequestBody JWTRequest request) {
         try {
@@ -58,6 +60,7 @@ public class AuthController {
         }
     }
     //User Register 
+    @Operation(summary="To Register a new user")
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JWTRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -73,6 +76,7 @@ public class AuthController {
     }
     
     //Logout Feature
+    @Operation(summary="to Logout form the system")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

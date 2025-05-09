@@ -9,7 +9,6 @@ public class LaptopListResponseDTO {
     private int pageNumber;
     private int pageSize;
 
-    // Getters and Setters
 
     public List<LaptopdetailsDTO> getContent() {
         return content;

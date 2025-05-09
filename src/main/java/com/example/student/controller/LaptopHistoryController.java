@@ -16,12 +16,5 @@ import com.example.student.Service.LaptopHistoryService;
 @RequestMapping("history")
 public class LaptopHistoryController {
 	
-   @Autowired 
-   private LaptopHistoryService historyService;
    
-   @GetMapping("student/{studentId}")
-   public List<LaptopHistoryDTO> getLaptopHistory(@PathVariable int studentId) {
-       return historyService.getLaptopHistoryByStudentId(studentId);
-   }
-
 }
