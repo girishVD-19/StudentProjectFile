@@ -67,10 +67,16 @@ public class AuthController {
     @Operation(summary="To Register a new user")
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JWTRequest request) {
+    	
+    	if (request.getUsername() == null || request.getUsername().isBlank() ||
+    	        request.getPassword() == null || request.getPassword().isBlank()) {
+    	        return ResponseEntity.badRequest().body("Username and password must not be null or empty");
+    	    }
+
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
-
+         
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));

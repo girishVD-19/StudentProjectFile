@@ -27,6 +27,10 @@ List<LaptopHistoryDTO> findLaptopHistoryByStudentId(int studentId);
 	@Query(value = "SELECT TOP 1 * FROM gd_laptop_history WHERE student_id = :studentId AND laptop_id = :laptopId AND return_date IS NULL ORDER BY assigned_date DESC", nativeQuery = true)
 	Gd_Laptop_History findLatestAssignedLaptopHistory(@Param("studentId") Integer studentId, @Param("laptopId") Integer laptopId);
 
-	
+	@Query(value = "SELECT s.student_id, s.name, h.assigned_date, h.return_date " +
+            "FROM gd_laptop_history h " +
+            "JOIN gd_student s ON h.student_id = s.student_id " +
+            "WHERE h.laptop_id = :laptopId", nativeQuery = true)
+    List<Object[]> findAllHistoryByLaptopId(@Param("laptopId") Integer laptopId);
 
 }

@@ -1,5 +1,7 @@
 package com.example.student.DTO;
 
+import io.jsonwebtoken.lang.Objects;
+
 public class SubjectDTO {
 	 private int id;
 	    private String name;
@@ -20,6 +22,8 @@ public class SubjectDTO {
 			this.id = id;
 			this.name = name;
 		}
+		
+		
 	    
 	    
 }

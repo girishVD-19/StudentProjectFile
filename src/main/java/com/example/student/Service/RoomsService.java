@@ -50,20 +50,20 @@ public class RoomsService {
         return roomrepository.save(room);
     }
 
-    public List<RoomDTO> getRoomWithClasses(Integer roomId) {
-        List<Object[]> results = roomrepository.findRoomWithClasses(roomId);
-        Map<Integer, RoomDTO> roomMap = new HashMap<>();
-        for (Object[] result : results) {
-            Integer roomId1 = (Integer) result[0];
-            Integer capacity = (Integer) result[1];
-            Integer classId = (Integer) result[2];
-            String className = (String) result[3];
-
-            RoomDTO roomDTO = roomMap.computeIfAbsent(roomId1, id -> new RoomDTO(id, capacity, new ArrayList<>()));
-            roomDTO.getClasses().add(new RoomDTO.ClassDTO(classId, className));
-        }
-        return new ArrayList<>(roomMap.values());
-    }
+//    public List<RoomDTO> getRoomWithClasses(Integer roomId) {
+//        List<Object[]> results = roomrepository.findRoomWithClasses(roomId);
+//        Map<Integer, RoomDTO> roomMap = new HashMap<>();
+//        for (Object[] result : results) {
+//            Integer roomId1 = (Integer) result[0];
+//            Integer capacity = (Integer) result[1];
+//            Integer classId = (Integer) result[2];
+//            String className = (String) result[3];
+//
+//            RoomDTO roomDTO = roomMap.computeIfAbsent(roomId1, id -> new RoomDTO(id, capacity, new ArrayList<>()));
+//            roomDTO.getClasses().add(new RoomDTO.ClassDTO(classId, className));
+//        }
+//        return new ArrayList<>(roomMap.values());
+//    }
     
     public void deactivateRoom(Integer roomId) {
     	

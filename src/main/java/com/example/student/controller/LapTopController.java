@@ -1,6 +1,7 @@
 package com.example.student.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,10 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.student.DTO.LaptopAssignmentDTO;
 import com.example.student.DTO.LaptopDTO;
 import com.example.student.DTO.LaptopListResponseDTO;
+import com.example.student.DTO.LaptopbyIdDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.Service.LapTopService;
+import com.example.student.entity.Gd_Laptop;
+import com.example.student.repository.LapTopRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -30,6 +35,9 @@ public class LapTopController {
 	
 	 @Autowired
 	    private LapTopService laptopService;
+	 
+	 @Autowired 
+	 private LapTopRepository laptoprepository;
 
 	    // GET all laptops
 	 @RestController
@@ -53,18 +61,13 @@ public class LapTopController {
 	         return ResponseEntity.ok(response);
 	     }
 	 }
-
-
-	    // GET a laptop by ID
-	 @Operation(
-    		 summary="To Get the All Laptop detail by Id",
-    		 description="To Get the All Detail by Id"
-    		 )
-	    @GetMapping("/{laptopId}")
-	    public ResponseEntity<LaptopdetailsDTO> getLaptopDetails(@PathVariable Integer laptopId) {
-	        LaptopdetailsDTO laptopDetails = laptopService.getLaptopDetails(laptopId);
-	        return ResponseEntity.ok(laptopDetails);
+      
+	 
+	 @GetMapping("{laptopId}")
+	    public LaptopbyIdDTO getLaptopDetails(@PathVariable Integer laptopId) {
+	        return laptopService.getLaptopDetailsById(laptopId);
 	    }
+
 
 	    // POST a new laptop
 	 @Operation(
@@ -86,18 +89,35 @@ public class LapTopController {
 	 @Operation(
 			 summary="To Assign Laptop to student",
 			 description="To Assign Laptop to student"
-			 )
-	    @PatchMapping("/assign/laptopId/{laptopId}/studentId/{studentId}")
-	    public ResponseEntity<String> assignLaptopToStudent(@PathVariable Integer laptopId, @PathVariable Integer studentId){
+			 ) 
+	 @PostMapping("/assign")
+	    public ResponseEntity<String> assignLaptopToStudent(@RequestBody LaptopAssignmentDTO request) {
+	        String result = laptopService.assignLaptopToStudent(request.getLaptopId(), request.getStudentId());
 
-	        // Call the service method to assign the laptop
-	        String response = laptopService.assignLaptopToStudent(laptopId, studentId);
-	        
-	        if (response.equals("Laptop assigned to student successfully")) {
-	            return ResponseEntity.ok(response);  // Return success response
+	        if (result.contains("successfully")) {
+	            return ResponseEntity.ok(result);
 	        } else {
-	            return ResponseEntity.badRequest().body(response);  // Return failure response
+	            return ResponseEntity.badRequest().body(result);
 	        }
 	    }
+	 
+	 @PatchMapping("/deactivate/{laptopId}")
+	 public ResponseEntity<String> deactivateLaptop(@PathVariable int laptopId) {
+	     Optional<Gd_Laptop> optionalLaptop = laptoprepository.findById(laptopId);
+
+	     if (!optionalLaptop.isPresent()) {
+	         return ResponseEntity.badRequest().body("Laptop not found");
+	     }
+
+	     Gd_Laptop laptop = optionalLaptop.get();
+
+	     if (laptop.getIS_ASSIGNED() == 1) {
+	         return ResponseEntity.badRequest().body("Laptop is currently assigned and cannot be deactivated");
+	     }
+
+	     laptop.setIS_ALIVE(false);
+	     laptoprepository.save(laptop);
+	     return ResponseEntity.ok("Laptop deactivated successfully");
+	 }
 
 }

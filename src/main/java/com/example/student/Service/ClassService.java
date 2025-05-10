@@ -19,10 +19,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo5.DTO.StudentDTO;
 import com.example.student.DTO.ClassDetailsDTO;
-import com.example.student.DTO.ClassDetailsDTO.SubjectDTOS;
 import com.example.student.DTO.ClassResponseDTO;
+import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
+import com.example.student.DTO.RoomDTO;
+import com.example.student.DTO.StudentForClass;
 import com.example.student.DTO.StudentListResponseDTO;
 import com.example.student.DTO.SubjectDTO;
 import com.example.student.entity.Gd_Class;
@@ -31,6 +34,8 @@ import com.example.student.entity.Gd_Subject_Mapping;
 import com.example.student.repository.ClassRepository;
 import com.example.student.repository.RoomRepository;
 import com.example.student.repository.SubjectMappingRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ClassService {
@@ -45,7 +50,7 @@ public class ClassService {
 	private SubjectMappingRepository subjectmappingrepository;
 	
 	public String createGdClass(ClassDetailsDTO dto) {
-	    Gd_Rooms room = roomrepository.findById(dto.getRoomId())
+	    Gd_Rooms room = roomrepository.findById(dto.getRoom().getRoom_id())
 	        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room ID does not exist"));
 
 	    Gd_Class gdClass = new Gd_Class();
@@ -91,7 +96,7 @@ public class ClassService {
     }
 	public ClassResponseDTO getAllClassDetails(Pageable pageable) {
 	    // Fetch paginated data from the repository
-	    Page<Object[]> results = classrepository.findAllClassDetailsWithRoomAndSubjects(pageable);
+	    Page<Object[]> results = classrepository.findClassDetailsWithRoomAndSubjects(pageable);
 
 	    // Convert the results into a List of ClassDetailsDTO
 	    List<ClassDetailsDTO> classDetails = new ArrayList<>();
@@ -100,15 +105,13 @@ public class ClassService {
 	        ClassDetailsDTO dto = new ClassDetailsDTO();
 	        dto.setClassId((Integer) result[0]);
 	        dto.setClassName((String) result[1]);
-	        dto.setStd((String) result[2]);
-	        dto.setRoomId((Integer) result[3]);
-	        dto.setRoomCapacity((Integer) result[4]);
+	        dto.setStd((String)result[2]);
 
-	        // Add subjects to the DTO
-	        SubjectDTOS subjectDTO = new SubjectDTOS();
-	        subjectDTO.setId((Integer) result[5]);
-	        subjectDTO.setName((String) result[6]);
-	        dto.setSubjects(Collections.singletonList(subjectDTO));
+	        // Create and set room object
+	        RoomDTO room = new RoomDTO();
+	        room.setRoom_id((Integer) result[3]);
+	        room.setCapacity((Integer) result[4]);
+	        dto.setRoom(room);
 
 	        classDetails.add(dto);
 	    }
@@ -118,50 +121,64 @@ public class ClassService {
 	    response.setContent(classDetails);
 	    response.setTotalElements(results.getTotalElements());
 	    response.setTotalPages(results.getTotalPages());
-	    response.setPageNumber(results.getNumber()+1);
+	    response.setPageNumber(results.getNumber() + 1);
 	    response.setPageSize(results.getSize());
 
 	    return response;
 	}
 
+	public ClassSummary getClassDetailsById(Integer classId) {
+	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);
+
+	    if (rows.isEmpty()) {
+	        throw new EntityNotFoundException("Class not found with ID: " + classId);
+	    }
+
+	    Object[] row = rows.get(0);
+
+	    // Core class details
+	    Integer classIdVal = (Integer) row[0];
+	    String className = (String) row[1];
+	    String std = (String) row[2];
+
+	    // Room
+	    Integer roomId = (Integer) row[3];
+	    Integer roomCapacity = (Integer) row[4];
+	    RoomDTO roomDTO = (roomId != null && roomCapacity != null) ? new RoomDTO(roomId, roomCapacity) : null;
+
+	    // Aggregated subject and student details
+	    String subjectIdsStr = (String) row[5];
+	    String subjectNamesStr = (String) row[6];
+	    String studentIdsStr = (String) row[7];
+	    String studentNamesStr = (String) row[8];
+
+	    Set<SubjectDTO> subjects = new HashSet<>();
+	    Set<StudentForClass> students = new HashSet<>();
+
+	    if (subjectIdsStr != null && subjectNamesStr != null) {
+	        String[] subjectIds = subjectIdsStr.split(",");
+	        String[] subjectNames = subjectNamesStr.split(",");
+	        for (int i = 0; i < subjectIds.length; i++) {
+	            subjects.add(new SubjectDTO(Integer.parseInt(subjectIds[i].trim()), subjectNames[i].trim()));
+	        }
+	    }
+
+	    if (studentIdsStr != null && studentNamesStr != null) {
+	        String[] studentIds = studentIdsStr.split(",");
+	        String[] studentNames = studentNamesStr.split(",");
+	        for (int i = 0; i < studentIds.length; i++) {
+	            students.add(new StudentForClass(Integer.parseInt(studentIds[i].trim()), studentNames[i].trim()));
+	        }
+	    }
+
+	    return new ClassSummary(classIdVal, className, std, roomDTO,
+	                            new ArrayList<>(subjects), new ArrayList<>(students));
+	}
+
+
+
 
 	
-
-	
-	
-	public ClassDetailsDTO getClassDetails(Integer classId) {
-        // Fetch the class details with room and subjects from the repository
-        List<Object[]> results = classrepository.findClassDetailsWithRoomAndSubjects(classId);
-        
-        
-        // Initialize DTO
-        ClassDetailsDTO dto = new ClassDetailsDTO();
-        
-        if(results.isEmpty()) {
-        	throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Class not found");
-       }
-        // If the query returns results, process them
-        if (!results.isEmpty()) {
-            Object[] firstResult = results.get(0); // Assumption: There is at least one result
-            dto.setClassId((Integer) firstResult[0]);
-            dto.setClassName((String) firstResult[1]);
-            dto.setStd((String) firstResult[2]);
-            dto.setRoomId((Integer) firstResult[3]);
-            dto.setRoomCapacity((Integer) firstResult[4]);
-
-            // Initialize subjects list
-            List<SubjectDTOS> subjects = new ArrayList<>();
-            for (Object[] result : results) {
-                SubjectDTOS subjectDTO = new SubjectDTOS();
-                subjectDTO.setId((Integer) result[5]);
-                subjectDTO.setName((String) result[6]);
-                subjects.add(subjectDTO);
-            }
-            dto.setSubjects(subjects);
-        }
-
-        return dto;
-    }
 
 
     public ClassDetailsDTO updateGdClass(Integer id, ClassDetailsDTO dto, Integer roomId) {

@@ -43,7 +43,23 @@ public interface LapTopRepository extends JpaRepository<Gd_Laptop,Integer> {
 
 	@Query(value = "SELECT CASE WHEN EXISTS (SELECT 1 FROM GD_LAPTOP WHERE MODEL_NO = :modelNo) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END", nativeQuery = true)
 	boolean existsByModelNo(@Param("modelNo") int modelNo);
+	
+	@Query(value = "SELECT l.LAPTOP_ID, l.MODEL_NO, l.IS_ASSIGNED, "
+            + "       s.STUDENT_ID AS studentId, s.NAME AS studentName, "
+            + "       h.HISTORY_ID AS historyId, h.ASSIGNED_DATE AS assignedDate, "
+            + "       h.RETURN_DATE AS returnDate "
+            + "FROM GD_LAPTOP l "
+            + "LEFT JOIN GD_STUDENT s ON s.LAPTOP_ID = l.LAPTOP_ID "
+            + "LEFT JOIN GD_LAPTOP_HISTORY h ON h.LAPTOP_ID = l.LAPTOP_ID "
+            + "WHERE l.LAPTOP_ID = :laptopId "
+            + "ORDER BY h.ASSIGNED_DATE DESC", nativeQuery = true)
+    List<Object[]> findLaptopDetailsWithAllHistoryById(@Param("laptopId") Integer laptopId);
+	
+	
+	
+	
 
 
+    
 
 }

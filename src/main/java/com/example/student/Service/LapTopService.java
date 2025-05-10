@@ -1,7 +1,9 @@
 package com.example.student.Service;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,15 +19,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.student.DTO.LaptopAssignmentDTO;
 import com.example.student.DTO.LaptopDTO;
 import com.example.student.DTO.LaptopListResponseDTO;
+import com.example.student.DTO.LaptopbyIdDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
+import com.example.student.DTO.LaptopdetailsDTO.StudentDTO;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Laptop_History;
 import com.example.student.entity.Gd_Student;
 import com.example.student.repository.LapTopRepository;
 import com.example.student.repository.LaptopHistoryRepository;
 import com.example.student.repository.StudentRepository;
+
+
 
 
 
@@ -41,7 +48,6 @@ public class LapTopService {
 	 @Autowired
 	 private LaptopHistoryRepository laptophistoryrepository;
 
-	
 	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable) {
 		    // Fetch paginated data from the repository
 		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithStudentAndHistory(pageable);
@@ -62,43 +68,27 @@ public class LapTopService {
 		            dto.setLaptopId(laptopId);
 		            dto.setModelNo((Integer) row[1]);
 		            dto.setIsAssigned((Integer) row[2]);
-		            dto.setStudents(new ArrayList<>());  // Initialize the students list
-		            dto.setHistories(new ArrayList<>()); // Initialize the histories list
+
+		            // If laptop is assigned, create student object
+		            if (dto.getIsAssigned() == 1) {
+		                StudentDTO student = new StudentDTO();
+		                student.setStudentId((Integer) row[3]);
+		                student.setStudentName((String) row[4]);
+
+		                // Add assigned date
+		                java.sql.Date assignedDate = (java.sql.Date) row[6];
+		                if (assignedDate != null) {
+		                    student.setAssignedDate(assignedDate.toLocalDate().toString());
+		                }
+
+		                dto.setStudents(student);  // Set the student for this laptop
+		            } else {
+		                dto.setStudents(new ArrayList<>());  // If no student assigned, set student to null
+		            }
+
 		            laptopDetailsMap.put(laptopId, dto);
 		            laptopDetailsList.add(dto);  // Add to list only once
 		        }
-
-		        // Add student if not already added
-		        Integer studentId = (Integer) row[3];
-		        if (!studentIds.contains(studentId)) {
-		            LaptopdetailsDTO.StudentDTO student = new LaptopdetailsDTO.StudentDTO();
-		            student.setStudentId(studentId);
-		            student.setStudentName((String) row[4]);
-		            dto.getStudents().add(student);
-		            studentIds.add(studentId);
-		        }
-
-		        // Add history record
-		        LaptopdetailsDTO.HistoryDTO history = new LaptopdetailsDTO.HistoryDTO();
-		        history.setHistoryId((Integer) row[5]);
-
-		        // Check if ASSIGNED_DATE is null
-		        java.sql.Date assignedDate = (java.sql.Date) row[6];
-		        if (assignedDate != null) {
-		            history.setAssignedDate(assignedDate.toLocalDate());
-		        } else {
-		            history.setAssignedDate(null);
-		        }
-
-		        // Check if RETURN_DATE is null
-		        java.sql.Date returnDate = (java.sql.Date) row[7];
-		        if (returnDate != null) {
-		            history.setReturnDate(returnDate.toLocalDate());
-		        } else {
-		            history.setReturnDate(null);
-		        }
-
-		        dto.getHistories().add(history);
 		    }
 
 		    // Create the response with pagination metadata
@@ -111,49 +101,113 @@ public class LapTopService {
 
 		    return response;
 		}
-
-        
-	 public LaptopdetailsDTO getLaptopDetails(Integer laptopId) {
-		    List<Object[]> results = laptopRepository.findLaptopDetailsWithStudentAndRecentHistory(laptopId);
-		    LaptopdetailsDTO dto = new LaptopdetailsDTO();
-		    Set<Integer> studentIds = new HashSet<>();
-
-		    for (Object[] row : results) {
-		        // Set basic laptop details
-		        dto.setLaptopId((Integer) row[0]);
-		        dto.setModelNo((Integer) row[1]);
-		        dto.setIsAssigned((Integer) row[2]);
-
-		        // Add student details if not already added
-		        Integer studentId = (Integer) row[3];
-		        if (!studentIds.contains(studentId)) {
-		            LaptopdetailsDTO.StudentDTO student = new LaptopdetailsDTO.StudentDTO();
-		            student.setStudentId(studentId);
-		            student.setStudentName((String) row[4]);
-		            dto.getStudents().add(student);
-		            studentIds.add(studentId);
-		        }
-
-		        // Add recent history record
-		        LaptopdetailsDTO.HistoryDTO history = new LaptopdetailsDTO.HistoryDTO();
-		        history.setHistoryId((Integer) row[5]);
-
-		        java.sql.Date assignedDate = (java.sql.Date) row[6];
-		        if (assignedDate != null) {
-		            history.setAssignedDate(assignedDate.toLocalDate());
-		        }
-
-		        java.sql.Date returnDate = (java.sql.Date) row[7];
-		        if (returnDate != null) {
-		            history.setReturnDate(returnDate.toLocalDate());
-		        }
-
-		        dto.getHistories().add(history);
-		    }
-
-		    return dto;
-		}
 	 
+	 public LaptopbyIdDTO getLaptopDetailsById(Integer laptopId) {
+	        // Fetch all records for the laptop from the repository
+	        List<Object[]> rows = laptopRepository.findLaptopDetailsWithAllHistoryById(laptopId);
+
+	        if (rows.isEmpty()) {
+	            return null; // Return null or throw exception if no laptop found
+	        }
+
+	        // List to hold the history records
+	        List<LaptopbyIdDTO.HistoryDTO> historyList = new ArrayList<>();
+	        LaptopbyIdDTO.StudentDTO student = null;
+
+	        // Iterate over the rows and map data to the DTO
+	        for (Object[] row : rows) {
+	            // Set laptop details (Only once for the first row)
+	            if (student == null) {
+	                Integer studentId = row[3] != null ? (Integer) row[3] : null;  // Ensure null check
+	                if (studentId != null) {
+	                    student = new LaptopbyIdDTO.StudentDTO(
+	                            studentId,                              // studentId
+	                            row[4] != null ? (String) row[4] : null,  // studentName
+	                            row[6] != null ? ((Date) row[6]).toString() : null // assignedDate
+	                    );
+	                } else {
+	                    student = new LaptopbyIdDTO.StudentDTO(0, "", null); // No student assigned, return empty student
+	                }
+	            }
+
+	            // Add history records
+	            if (row[5] != null) { // If historyId exists
+	                Integer historyId = (Integer) row[5];
+
+	                // Check for historyStudentId and handle null
+	                Integer historyStudentId = (row[3] != null) ? (Integer) row[3] : null;
+
+	                // Convert assignedDate and returnDate to String
+	                String historyAssignedDate = (row[6] != null) ? ((Date) row[6]).toString() : null;
+	                String historyReturnDate = (row[7] != null) ? ((Date) row[7]).toString() : null;
+
+	                // If historyStudentId is null, we assign a default value to avoid errors
+	                if (historyStudentId != null) {
+	                    LaptopbyIdDTO.HistoryDTO history = new LaptopbyIdDTO.HistoryDTO(
+	                            historyId, historyStudentId, historyAssignedDate, historyReturnDate
+	                    );
+	                    historyList.add(history);
+	                }
+	            }
+	        }
+
+	        // Return the final DTO with student and history
+	        return new LaptopbyIdDTO(
+	                (Integer) rows.get(0)[0], // laptopId
+	                (Integer) rows.get(0)[1], // modelNo
+	                (Integer) rows.get(0)[2], // isAssigned
+	                student,                  // student info inside an object
+	                historyList               // all history records
+	        );
+	    }
+	 
+	 
+	 public String assignLaptopToStudent(int laptopId, int studentId) {
+	        // Retrieve the laptop and student entities
+	        Optional<Gd_Laptop> laptopOpt = laptopRepository.findById(laptopId);
+	        Optional<Gd_Student> studentOpt = studentrepository.findById(studentId);
+
+	        if (!laptopOpt.isPresent()) {
+	            return "Laptop not found.";
+	        }
+
+	        if (!studentOpt.isPresent()) {
+	            return "Student not found.";
+	        }
+
+	        Gd_Laptop laptop = laptopOpt.get();
+	        Gd_Student student = studentOpt.get();
+
+	        // Check if the laptop is already assigned
+	        if (laptop.getIS_ASSIGNED() == 1) {
+	            return "Laptop is already assigned to another student.";
+	        }
+
+	        // Check if the laptop is active
+	        if (!laptop.getIS_ALIVE()) {
+	            return "Laptop is not active and cannot be assigned.";
+	        }
+
+	        // Assign the laptop to the student
+	        laptop.setIS_ASSIGNED(1);
+	        laptop.setGd_student(Collections.singletonList(student)); // Assuming Gd_Student has a reference to Gd_Laptop
+	        laptopRepository.save(laptop);
+
+	        // Update the student's laptop reference
+	        student.setGd_laptop(laptop);
+	        studentrepository.save(student);
+
+	        // Create and save the laptop history record
+	        Gd_Laptop_History history = new Gd_Laptop_History();
+	        history.setGd_laptop(laptop);
+	        history.setGd_student(student);
+	        history.setASSIGNED_DATE(LocalDate.now());
+	        history.setReturn_Date(null); // Laptop is currently assigned, so return date is null
+	        laptophistoryrepository.save(history);
+
+	        return "Laptop assigned to student successfully, history updated.";
+	    }
+
 	 public LaptopDTO saveLaptop(LaptopDTO dto) {
 		 try {
 	            // Check if a laptop with the same modelNo already exists

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.ClassResponseDTO;
+import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.Service.ClassService;
 
@@ -54,9 +55,9 @@ public class ClassController {
     		 description="To get the details of the Specific Class Id"
     		 )
 	 @GetMapping("{classId}")
-	    public ResponseEntity<ClassDetailsDTO> getClassDetails(@PathVariable Integer classId) {
+	    public ResponseEntity<ClassSummary> getClassDetails(@PathVariable Integer classId) {
 	        try {
-	            ClassDetailsDTO classDetails = classservice.getClassDetails(classId);  // Call service method to fetch data
+	            ClassSummary classDetails = classservice.getClassDetailsById(classId);  // Call service method to fetch data
 
 	            if (classDetails == null) {
 	                // If class not found, return a 404 Not Found response
@@ -69,7 +70,6 @@ public class ClassController {
 	            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	        }
 	    }
-        
      @Operation(
     		 summary="To Get Details of the Students with Class",
     		 description="To Get Details of the Students with Class"

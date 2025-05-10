@@ -42,14 +42,14 @@ public class RoomsController {
 
 
     // Get a room by ID
-    @GetMapping("/{roomId}")
-    @Operation(summary="To Get all the data Of Rooms",
-	description="To Get all the of Rooms"
-	)
-    public ResponseEntity<List<RoomDTO>> getRoomWithClasses(@PathVariable Integer roomId) {
-        List<RoomDTO> roomDetails = roomservice.getRoomWithClasses(roomId);
-        return ResponseEntity.ok(roomDetails);
-    }
+//    @GetMapping("/{roomId}")
+//    @Operation(summary="To Get all the data Of Rooms",
+//	description="To Get all the of Rooms"
+//	)
+//    public ResponseEntity<List<RoomDTO>> getRoomWithClasses(@PathVariable Integer roomId) {
+//        List<RoomDTO> roomDetails = roomservice.getRoomWithClasses(roomId);
+//        return ResponseEntity.ok(roomDetails);
+//    }
 
 
     // Create or update a room
