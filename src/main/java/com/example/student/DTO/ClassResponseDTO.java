@@ -10,7 +10,6 @@ public class ClassResponseDTO {
 	    private int pageSize;
 
 	    // Getters and Setters
-
 	    public List<ClassDetailsDTO> getContent() {
 	        return content;
 	    }

@@ -127,8 +127,6 @@ public class ClassService {
 	    return response;
 	}
 	
-	
-
 	public ClassSummary getClassDetailsById(Integer classId) {
 	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);
 
@@ -191,10 +189,6 @@ public class ClassService {
 	    gdClass.setGd_roooms(room);
 	    return classrepository.save(gdClass);
 	}
-
-
-
-	
 
 
     public ClassDetailsDTO updateGdClass(Integer id, ClassDetailsDTO dto, Integer roomId) {
