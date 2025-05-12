@@ -3,6 +3,7 @@ package com.example.student.Service;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,60 +49,77 @@ public class LapTopService {
 	 @Autowired
 	 private LaptopHistoryRepository laptophistoryrepository;
 
-	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable) {
-		    // Fetch paginated data from the repository
-		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithStudentAndHistory(pageable);
+	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable, Boolean isAssigned, Boolean isActive) {
+		    // Fetch paginated results with filters applied
+		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithFilters(pageable, isAssigned, isActive);
 
-		    // List to hold the final laptop details DTOs
 		    List<LaptopdetailsDTO> laptopDetailsList = new ArrayList<>();
 		    Map<Integer, LaptopdetailsDTO> laptopDetailsMap = new HashMap<>();
-		    Set<Integer> studentIds = new HashSet<>();
+		  
 
-		    // Iterate through all results
+		    // Iterate over the query results
 		    for (Object[] row : results) {
-		        Integer laptopId = (Integer) row[0];
+		    	 System.out.println("Row data: " + Arrays.toString(row));
+		    	 Integer laptopId = (Integer) row[0];
+		    	 LaptopdetailsDTO dto = laptopDetailsMap.get(laptopId);	    	  
 
-		        // Check if laptop details already exist in the map, else create new
-		        LaptopdetailsDTO dto = laptopDetailsMap.get(laptopId);
+		        
 		        if (dto == null) {
 		            dto = new LaptopdetailsDTO();
 		            dto.setLaptopId(laptopId);
-		            dto.setModelNo((Integer) row[1]);
-		            dto.setIsAssigned((Integer) row[2]);
 
-		            // If laptop is assigned, create student object
+		            // Handle model number (likely Integer)
+		            dto.setModelNo((row[1] != null) ? ((Number) row[1]).intValue() : null);
+
+		            // IS_ASSIGNED: Ensure proper casting (1 or 0)
+		            if (row[2] != null) {
+		                if (row[2] instanceof Integer) {
+		                    dto.setIsAssigned((Integer) row[2]);
+		                } else if (row[2] instanceof Boolean) {
+		                    dto.setIsAssigned((Boolean) row[2] ? 1 : 0); // Convert Boolean to 1/0
+		                }
+		            }
+
+		            // IS_ACTIVE: Ensure proper casting (1 or 0)
+		            if (row[8] != null) {
+		                if (row[8] instanceof Integer) {
+		                    dto.setIsActive((Integer) row[8]);
+		                } else if (row[8] instanceof Boolean) {
+		                    dto.setIsActive((Boolean) row[8] ? 1 : 0); // Convert Boolean to 1/0
+		                }
+		            }
+
+		            // Handle student info if assigned
 		            if (dto.getIsAssigned() == 1) {
 		                StudentDTO student = new StudentDTO();
-		                student.setStudentId((Integer) row[3]);
+		                student.setStudentId((row[3] != null) ? ((Number) row[3]).intValue() : null);
 		                student.setStudentName((String) row[4]);
 
-		                // Add assigned date
 		                java.sql.Date assignedDate = (java.sql.Date) row[6];
 		                if (assignedDate != null) {
 		                    student.setAssignedDate(assignedDate.toLocalDate().toString());
 		                }
 
-		                dto.setStudents(student);  // Set the student for this laptop
+		                dto.setStudents(student);  // One student assigned
 		            } else {
-		                dto.setStudents(new ArrayList<>());  // If no student assigned, set student to null
+		                dto.setStudents(new ArrayList<>());  // No student assigned
 		            }
 
 		            laptopDetailsMap.put(laptopId, dto);
-		            laptopDetailsList.add(dto);  // Add to list only once
+		            laptopDetailsList.add(dto);
 		        }
 		    }
 
-		    // Create the response with pagination metadata
 		    LaptopListResponseDTO response = new LaptopListResponseDTO();
-		    response.setContent(laptopDetailsList);  // List of laptop details DTOs
+		    response.setContent(laptopDetailsList);
 		    response.setTotalElements(results.getTotalElements());
 		    response.setTotalPages(results.getTotalPages());
-		    response.setPageNumber(results.getNumber() + 1);  // Adjust page number to start from 1
+		    response.setPageNumber(results.getNumber() + 1);
 		    response.setPageSize(results.getSize());
 
 		    return response;
 		}
-	 
+
 	 public LaptopbyIdDTO getLaptopDetailsById(Integer laptopId) {
 	        // Fetch all records for the laptop from the repository
 	        List<Object[]> rows = laptopRepository.findLaptopDetailsWithAllHistoryById(laptopId);

@@ -12,19 +12,15 @@ import org.springframework.data.repository.query.Param;
 import com.example.student.entity.Gd_Class;
 
 public interface ClassRepository extends JpaRepository<Gd_Class,Integer> {
-	@Query(
-		    value = "SELECT c.CLASS_ID, c.CLASS_NAME, c.STD, " +
-		            "r.ROOM_ID AS roomId, r.CAPACITY AS roomCapacity, " +
-		            "s.SUBJECT_ID AS subjectId, s.SUBJECT_NAME AS subjectName " +
-		            "FROM GD_CLASS c " +
-		            "LEFT JOIN GD_ROOMS r ON r.ROOM_ID = c.ROOM_ID " +
-		            "LEFT JOIN GD_SUBJECT_MAPPTING sm ON sm.CLASS_ID = c.CLASS_ID " +
-		            "LEFT JOIN GD_SUBJECT s ON sm.SUBJECT_ID = s.SUBJECT_ID",
-		    countQuery = "SELECT COUNT(DISTINCT c.CLASS_ID) FROM GD_CLASS c",
-		    nativeQuery = true
-		)
-		Page<Object[]> findClassDetailsWithRoomAndSubjects(Pageable pageable);
-		
+	@Query(value = "SELECT c.CLASS_ID, c.CLASS_NAME, c.STD, r.ROOM_ID, r.CAPACITY " +
+            "FROM GD_CLASS c " +
+            "JOIN GD_ROOMS r ON c.ROOM_ID = r.ROOM_ID " +
+            "WHERE (:std IS NULL OR c.STD = :std)",
+    countQuery = "SELECT COUNT(*) FROM GD_CLASS c " +
+                 "WHERE (:std IS NULL OR c.STD = :std)",
+    nativeQuery = true)
+Page<Object[]> findClassDetailsWithRoomAndSubjects(@Param("std") String std, Pageable pageable);
+
 		@Query(value = "SELECT " +
 		        "c.class_id, c.class_name, c.std, " +
 		        "r.room_id, r.capacity, " +

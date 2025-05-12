@@ -5,7 +5,8 @@ import java.util.List;
 public class LaptopdetailsDTO {
     private Integer laptopId;
     private Integer modelNo;
-    private Integer isAssigned;
+	private Integer isAssigned;
+    private Integer isActive;
     private Object students;
 
     // Getters and Setters
@@ -29,8 +30,8 @@ public class LaptopdetailsDTO {
         return isAssigned;
     }
 
-    public void setIsAssigned(Integer isAssigned) {
-        this.isAssigned = isAssigned;
+    public void setIsAssigned(Integer i) {
+        this.isAssigned = i;
     }
 
     public Object getStudents() {
@@ -40,6 +41,15 @@ public class LaptopdetailsDTO {
     public void setStudents(Object students) {
         this.students = students;
     }
+    
+    public Integer getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(Integer isActive) {
+		this.isActive = isActive;
+	}
+
 
     // Inner class for StudentDTO
     public static class StudentDTO {

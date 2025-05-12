@@ -40,12 +40,13 @@ public class ClassController {
 	@GetMapping("/")
 	public ResponseEntity<ClassResponseDTO> getAllClassDetails(
 	        @RequestParam(defaultValue = "1") Integer pageNo,
-	        @RequestParam(defaultValue = "10") Integer pageSize) {
+	        @RequestParam(defaultValue = "10") Integer pageSize,
+	@RequestParam(required=false) String std){
 
 	    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // PageRequest is zero-indexed
 
 	    // Call service to fetch all class details with pagination
-	    ClassResponseDTO response = classservice.getAllClassDetails(pageable);
+	    ClassResponseDTO response = classservice.getAllClassDetails(pageable,std);
 
 	    return ResponseEntity.ok(response);
 	}

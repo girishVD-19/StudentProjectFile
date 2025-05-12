@@ -94,20 +94,17 @@ public class ClassService {
         dto.setStudent(studentDTOs);
         return dto;
     }
-	public ClassResponseDTO getAllClassDetails(Pageable pageable) {
-	    // Fetch paginated data from the repository
-	    Page<Object[]> results = classrepository.findClassDetailsWithRoomAndSubjects(pageable);
+	public ClassResponseDTO getAllClassDetails(Pageable pageable, String std) {
+	    Page<Object[]> results = classrepository.findClassDetailsWithRoomAndSubjects(std, pageable);
 
-	    // Convert the results into a List of ClassDetailsDTO
 	    List<ClassDetailsDTO> classDetails = new ArrayList<>();
 
 	    for (Object[] result : results) {
 	        ClassDetailsDTO dto = new ClassDetailsDTO();
 	        dto.setClassId((Integer) result[0]);
 	        dto.setClassName((String) result[1]);
-	        dto.setStd((String)result[2]);
+	        dto.setStd((String) result[2]);
 
-	        // Create and set room object
 	        RoomDTO room = new RoomDTO();
 	        room.setRoom_id((Integer) result[3]);
 	        room.setCapacity((Integer) result[4]);
@@ -116,7 +113,6 @@ public class ClassService {
 	        classDetails.add(dto);
 	    }
 
-	    // Create the response DTO with pagination metadata
 	    ClassResponseDTO response = new ClassResponseDTO();
 	    response.setContent(classDetails);
 	    response.setTotalElements(results.getTotalElements());
@@ -126,6 +122,7 @@ public class ClassService {
 
 	    return response;
 	}
+
 
 	public ClassSummary getClassDetailsById(Integer classId) {
 	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);

@@ -39,28 +39,18 @@ public class LapTopController {
 	 @Autowired 
 	 private LapTopRepository laptoprepository;
 
-	    // GET all laptops
-	 @RestController
-	 @RequestMapping("/laptop")
-	 public class LaptopController {
-
-	     @Autowired
-	     private LapTopService laptopService;
-
+	
 	     @GetMapping("/")
-	     @Operation(
-	    		 summary="To Get the All Laptop Details",
-	    		 description="To Get the All Laptop Details"
-	    		 )
-	     public ResponseEntity<LaptopListResponseDTO> getAllLaptops(
-	             @RequestParam(defaultValue = "1") int pageNo,
-	             @RequestParam(defaultValue = "10") int pageSize) {
+	     public ResponseEntity<LaptopListResponseDTO> getAllLaptopDetails(
+	             @RequestParam(defaultValue = "0") int page,
+	             @RequestParam(defaultValue = "10") int size,
+	             @RequestParam(required = false) Boolean isAssigned,
+	             @RequestParam(required = false) Boolean isActive) {
 
-	         Pageable pageable = PageRequest.of(pageNo - 1, pageSize);  // Adjust for 1-based page number
-	         LaptopListResponseDTO response = laptopService.getAllLaptopDetails(pageable);
+	         Pageable pageable = PageRequest.of(page, size);
+	         LaptopListResponseDTO response = laptopService.getAllLaptopDetails(pageable, isAssigned, isActive);
 	         return ResponseEntity.ok(response);
 	     }
-	 }
       
 	 
 	 @GetMapping("{laptopId}")
@@ -119,5 +109,26 @@ public class LapTopController {
 	     laptoprepository.save(laptop);
 	     return ResponseEntity.ok("Laptop deactivated successfully");
 	 }
+	 
+	 @PatchMapping("/activate/{laptopId}")
+	 public ResponseEntity<String> activateLaptop(@PathVariable int laptopId) {
+	     Optional<Gd_Laptop> optionalLaptop = laptoprepository.findById(laptopId);
 
-}
+	     if (!optionalLaptop.isPresent()) {
+	         return ResponseEntity.badRequest().body("Laptop not found");
+	     }
+
+	     Gd_Laptop laptop = optionalLaptop.get();
+
+	     if (laptop.getIS_ASSIGNED() == 0) {
+	    	 laptop.setIS_ALIVE(true);
+		     laptoprepository.save(laptop);
+	     }
+	     else {
+	    	 return ResponseEntity.ok("Laptop is assigned to someone");
+	     }
+	     return ResponseEntity.ok("Laptop activated successfully");
+	 }
+
+	 }
+
