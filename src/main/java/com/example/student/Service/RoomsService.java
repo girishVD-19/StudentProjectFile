@@ -1,9 +1,8 @@
 package com.example.student.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageSortDTO;
-import com.example.student.DTO.RoomDTO;
 import com.example.student.DTO.RoomWithClassDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
@@ -117,7 +115,6 @@ public class RoomsService {
         if (partialRoom.getCapacity() != 0) {
             existingRoom.setCapacity(partialRoom.getCapacity());
         }
-        System.out.println(partialRoom.isIs_active());
         
         if ( partialRoom.isIs_active() == true) {
             if (existingRoom.isIs_active() == true) {

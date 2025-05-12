@@ -1,7 +1,7 @@
 package com.example.student.repository;
 
 import java.util.List;
-import java.util.Optional;
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +41,5 @@ Page<Object[]> findClassDetailsWithRoomAndSubjects(@Param("std") String std, Pag
 		        "WHERE c.class_id = :classId",
 		        nativeQuery = true)
 		List<Object[]> findClassWithRelationsNative(@Param("classId") Integer classId);
-
 
 		}

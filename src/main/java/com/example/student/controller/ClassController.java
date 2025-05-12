@@ -1,10 +1,8 @@
 package com.example.student.controller;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,7 +22,7 @@ import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.Service.ClassService;
-import com.example.student.entity.Gd_Class;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 
