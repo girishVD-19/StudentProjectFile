@@ -11,10 +11,11 @@ import com.example.student.entity.Gd_Rooms;
 
 public interface RoomRepository extends JpaRepository<Gd_Rooms,Integer> {
 
-	@Query(value = "SELECT r.room_id, r.capacity, c.class_id, c.class_name "
-            + "FROM Gd_Rooms r "
-            + "LEFT JOIN Gd_Class c ON c.room_id = r.room_id "
-            + "WHERE r.room_id = :roomId", nativeQuery = true)
-List<Object[]> findRoomWithClasses(@Param("roomId") Integer roomId);
+	@Query(value = "SELECT r.ROOM_ID, r.CAPACITY, c.CLASS_ID, c.CLASS_NAME, c.STD " +
+            "FROM GD_ROOMS r " +
+            "JOIN GD_CLASS c ON r.ROOM_ID = c.ROOM_ID " +
+            "WHERE r.ROOM_ID = :roomId",
+    nativeQuery = true)
+List<Object[]> findRoomWithClassDetails(@Param("roomId") Integer roomId);
 
 }

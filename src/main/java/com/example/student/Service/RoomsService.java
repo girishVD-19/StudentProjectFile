@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
+import com.example.student.DTO.RoomWithClassDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
 import com.example.student.repository.ClassRepository;
@@ -50,21 +51,39 @@ public class RoomsService {
         return roomrepository.save(room);
     }
 
-//    public List<RoomDTO> getRoomWithClasses(Integer roomId) {
-//        List<Object[]> results = roomrepository.findRoomWithClasses(roomId);
-//        Map<Integer, RoomDTO> roomMap = new HashMap<>();
-//        for (Object[] result : results) {
-//            Integer roomId1 = (Integer) result[0];
-//            Integer capacity = (Integer) result[1];
-//            Integer classId = (Integer) result[2];
-//            String className = (String) result[3];
-//
-//            RoomDTO roomDTO = roomMap.computeIfAbsent(roomId1, id -> new RoomDTO(id, capacity, new ArrayList<>()));
-//            roomDTO.getClasses().add(new RoomDTO.ClassDTO(classId, className));
-//        }
-//        return new ArrayList<>(roomMap.values());
-//    }
+    public RoomWithClassDTO getRoomWithClass(Integer roomId) {
+        List<Object[]> results = roomrepository.findRoomWithClassDetails(roomId);
+
+        if (results.isEmpty()) {
+            return null; // or throw custom exception
+        }
+
+        Object[] row = results.get(0); // Only expecting one class per room in this structure
+
+        RoomWithClassDTO dto = new RoomWithClassDTO();
+        dto.setRoom_id((Integer) row[0]);
+        dto.setCapacity((Integer) row[1]);
+
+        RoomWithClassDTO.ClassDTO classDTO = new RoomWithClassDTO.ClassDTO(
+            (Integer) row[2],         // classId
+            (String) row[3],          // className
+            (String) row[4]           // std
+        );
+
+        dto.setClasses(classDTO);
+        return dto;
+    }
     
+    public Gd_Class updateClassRoom(Integer classId, Integer roomId) {
+	    Gd_Class gdClass = classrepository.findById(classId)
+	            .orElseThrow(() -> new RuntimeException("Class not found with id: " + classId));
+
+	    Gd_Rooms room = roomrepository.findById(roomId)
+	            .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
+
+	    gdClass.setGd_roooms(room);
+	    return classrepository.save(gdClass);
+	}
     public void deactivateRoom(Integer roomId) {
     	
     	Gd_Rooms room = roomrepository.findById(roomId)
@@ -98,7 +117,14 @@ public class RoomsService {
         if (partialRoom.getCapacity() != 0) {
             existingRoom.setCapacity(partialRoom.getCapacity());
         }
-
+        System.out.println(partialRoom.isIs_active());
+        
+        if ( partialRoom.isIs_active() == true) {
+            if (existingRoom.isIs_active() == true) {
+                throw new IllegalStateException("Room is already active");
+            }
+            existingRoom.setIs_active(true);
+        }
         // Extend this as needed for other partial updates
 
         return roomrepository.save(existingRoom);

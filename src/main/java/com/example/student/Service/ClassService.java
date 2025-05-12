@@ -16,7 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo5.DTO.StudentDTO;
@@ -122,7 +126,8 @@ public class ClassService {
 
 	    return response;
 	}
-
+	
+	
 
 	public ClassSummary getClassDetailsById(Integer classId) {
 	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);
@@ -172,6 +177,20 @@ public class ClassService {
 	                            new ArrayList<>(subjects), new ArrayList<>(students));
 	}
 
+	public Gd_Class updateClassRoom(Integer classId, Integer roomId) {
+	    Gd_Class gdClass = classrepository.findById(classId)
+	            .orElseThrow(() -> new RuntimeException("Class not found with id: " + classId));
+
+	    Gd_Rooms room = roomrepository.findById(roomId)
+	            .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
+	    if (!room.isIs_active()) {
+	        throw new IllegalStateException("Room is not active");
+	    }
+
+
+	    gdClass.setGd_roooms(room);
+	    return classrepository.save(gdClass);
+	}
 
 
 

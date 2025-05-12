@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
+import com.example.student.DTO.RoomWithClassDTO;
 import com.example.student.Service.RoomsService;
+import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,15 +44,14 @@ public class RoomsController {
 	}
 
 
-    // Get a room by ID
-//    @GetMapping("/{roomId}")
-//    @Operation(summary="To Get all the data Of Rooms",
-//	description="To Get all the of Rooms"
-//	)
-//    public ResponseEntity<List<RoomDTO>> getRoomWithClasses(@PathVariable Integer roomId) {
-//        List<RoomDTO> roomDetails = roomservice.getRoomWithClasses(roomId);
-//        return ResponseEntity.ok(roomDetails);
-//    }
+    @GetMapping("/{roomId}")
+    @Operation(summary="To Get all the data Of Rooms",
+	description="To Get all the of Rooms"
+	)
+    public ResponseEntity<RoomWithClassDTO> getRoomWithClasses(@PathVariable Integer roomId) {
+        RoomWithClassDTO roomDetails = roomservice.getRoomWithClass(roomId);
+        return ResponseEntity.ok(roomDetails);
+    }
 
 
     // Create or update a room
@@ -97,7 +99,8 @@ public class RoomsController {
                                  .body("An unexpected error occurred.");
         }
     }
-
+    
+    
     // Delete a room by ID
     @DeleteMapping("/{id}")
     @Operation(

@@ -1,6 +1,7 @@
 package com.example.student.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +24,7 @@ import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.Service.ClassService;
+import com.example.student.entity.Gd_Class;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -95,18 +97,25 @@ public class ClassController {
 	     }
 	 }
 
-     @Operation(
-    		 summary="To Update the Class Details.",
-    		 description="To Update the Class Details With the given class id."
-               ) 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ClassDetailsDTO> updateClass(
-            @PathVariable Integer id,
-            @RequestBody ClassDetailsDTO classDto,
-            @RequestParam Integer roomId
-    ) {
-        return ResponseEntity.ok(classservice.updateGdClass(id, classDto, roomId));
-    }
+     @PatchMapping("update/{id}")
+     public ResponseEntity<String> updateClassRoomFromJson(
+             @PathVariable Integer id,
+             @RequestBody Map<String, Integer> requestBody) {
+
+         Integer roomId = requestBody.get("roomId");
+         if (roomId == null) {
+             return ResponseEntity.badRequest().body("Missing roomId in request body.");
+         }
+
+         try {
+             classservice.updateClassRoom(id, roomId);
+             return ResponseEntity.ok("Room updated successfully.");
+         } catch (IllegalStateException e) {
+             return ResponseEntity.badRequest().body(e.getMessage());  // e.g., "Room is not active"
+         } catch (RuntimeException e) {
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+         }
+     }
 
     @DeleteMapping("/{id}")
     @Operation(

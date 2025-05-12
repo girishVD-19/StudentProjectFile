@@ -6,10 +6,7 @@ public class RoomDTO {
 	
 	private Integer room_id;
 	private Integer capacity;
-	
-	 
-	
-	
+		
 	public RoomDTO() {
 		
 	}

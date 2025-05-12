@@ -317,12 +317,7 @@ public class LapTopService {
 	        if (lastAssignedHistory != null) {
 	            lastAssignedHistory.setReturn_Date(LocalDate.now());
 	            laptophistoryrepository.save(lastAssignedHistory);
-	        }
-	    
-
-	        
-	      
-
+	        }      
 	        // 5. Create a new laptop history record for the assignment
 	        Gd_Laptop_History history = new Gd_Laptop_History();
 	        history.setGd_laptop(laptop);
