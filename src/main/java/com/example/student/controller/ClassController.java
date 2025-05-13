@@ -94,7 +94,10 @@ public class ClassController {
 	         return ResponseEntity.badRequest().body("Cannot create class: duplicate or invalid data.");
 	     }
 	 }
-
+     
+@Operation(summary="To Update the the Class Room",
+description="To update the class room details"
+)
      @PatchMapping("update/{id}")
      public ResponseEntity<String> updateClassRoomFromJson(
              @PathVariable Integer id,

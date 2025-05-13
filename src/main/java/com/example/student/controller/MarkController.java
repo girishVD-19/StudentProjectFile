@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.MarkDTO;
+import com.example.student.DTO.MarkResponseDTO;
 import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.Service.StudentMarkService;
 import com.example.student.entity.Gd_Student_Mark;
@@ -84,17 +86,19 @@ public class MarkController {
 			 description="To Get The Mark Data of student By ClassId"
 			 )
     @GetMapping("student/{studentId}/class/{classId}")
-    public ResponseEntity<List<MarkDTO>> getMarksByStudentIdAndClassId(
-            @PathVariable int studentId, @PathVariable int classId) {
-        
-        List<MarkDTO> marks = markService.getMarksByStudentIdAndClassId(studentId, classId);
-        
-        if (marks.isEmpty()) {
+    public ResponseEntity<MarkResponseDTO> getStructuredMarksByStudentAndClass(
+            @PathVariable int studentId,
+            @PathVariable int classId) {
+
+        MarkResponseDTO response = markService.getStructuredMarks(studentId, classId);
+
+        if (response == null) {
             return ResponseEntity.notFound().build();
         }
-        
-        return ResponseEntity.ok(marks);
+
+        return ResponseEntity.ok(response);
     }
+
     @Operation(
 			 summary="To Get The Mark Data of student By Serial No",
 			 description="To Get The Mark Data of student By Serial No"

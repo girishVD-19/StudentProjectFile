@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.MarkDTO;
+import com.example.student.DTO.MarkResponseDTO;
+import com.example.student.DTO.MarkResponseDTO.SubjectMarkDTOs;
+import com.example.student.DTO.MarkResponseDTO.classDTO;
+import com.example.student.DTO.MarkResponseDTO.studentDTO;
 import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.DTO.StudentMarkSummaryDTO;
 import com.example.student.entity.Gd_Student;
@@ -112,27 +116,47 @@ public class StudentMarkService {
     }
     
     
-    public List<MarkDTO> getMarksByStudentIdAndClassId(int studentId, int classId) {
+    public MarkResponseDTO getStructuredMarks(int studentId, int classId) {
         List<Gd_Student_Mark> marks = markRepository.findMarksByStudentIdAndClassId(studentId, classId);
-        List<MarkDTO> markDTOs = new ArrayList<>();
 
-        for (Gd_Student_Mark mark : marks) {
-            Gd_Student student = mark.getGd_student();
-            Gd_Subject_Mapping subjectMapping = mark.getGd_subject_mapping();
-            Gd_Subject subject = subjectMapping != null ? subjectMapping.getGd_subject() : null;
-
-            markDTOs.add(new MarkDTO(
-                mark.getMARK_ID(),
-                student != null ? student.getSTUDENT_ID() : 0,
-                student != null ? student.getNAME() : null,
-                subject != null ? subject.getSUBJECT_ID() : 0,
-                subject != null ? subject.getSUBJECT_NAME() : null,
-                mark.getMARKS(),
-                mark.getREMARK()
-            ));
+        if (marks.isEmpty()) {
+            return null;
         }
 
-        return markDTOs;
+        // Student info
+        Gd_Student student = marks.get(0).getGd_student();
+        studentDTO studentDTO = new studentDTO(
+            student.getSTUDENT_ID(),
+            student.getNAME()
+        );
+
+        // Class info from mapping
+        Gd_Subject_Mapping firstMapping = marks.get(0).getGd_subject_mapping();
+        int classIdMapped = firstMapping.getGd_class().getCLASS_ID();
+        String className = firstMapping.getGd_class().getCLASS_NAME();
+        String std = firstMapping.getGd_class().getSTD();
+
+        classDTO classDetail = new classDTO(classIdMapped, className, std);
+
+        // Subject marks list
+        List<SubjectMarkDTOs> subjectDetails = new ArrayList<>();
+        for (Gd_Student_Mark mark : marks) {
+            Gd_Subject_Mapping mapping = mark.getGd_subject_mapping();
+            if (mapping != null) {
+                Gd_Subject subject = mapping.getGd_subject();
+                if (subject != null) {
+                    subjectDetails.add(new SubjectMarkDTOs(
+                        subject.getSUBJECT_ID(),
+                        subject.getSUBJECT_NAME(),
+                        mark.getMARKS(),
+                        mark.getREMARK()
+                    ));
+                }
+            }
+        }
+
+        // Build response DTO
+        return new MarkResponseDTO(studentDTO, classDetail, subjectDetails);
     }
 
     
