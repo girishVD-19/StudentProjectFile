@@ -28,6 +28,7 @@ import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.RoomDTO;
 import com.example.student.DTO.StudentForClass;
 import com.example.student.DTO.StudentListResponseDTO;
@@ -98,35 +99,35 @@ public class ClassService {
         dto.setStudent(studentDTOs);
         return dto;
     }
-	public ClassResponseDTO getAllClassDetails(Pageable pageable, String std) {
+	public PageSortDTO<ClassDetailsDTO> getAllClassDetails(Pageable pageable, String std) {
 	    Page<Object[]> results = classrepository.findClassDetailsWithRoomAndSubjects(std, pageable);
-
 	    List<ClassDetailsDTO> classDetails = new ArrayList<>();
 
 	    for (Object[] result : results) {
 	        ClassDetailsDTO dto = new ClassDetailsDTO();
-	        dto.setClassId((Integer) result[0]);
+	        dto.setClassId(((Integer) result[0])); // Handle Integer/Long casting safely
 	        dto.setClassName((String) result[1]);
 	        dto.setStd((String) result[2]);
 
 	        RoomDTO room = new RoomDTO();
-	        room.setRoom_id((Integer) result[3]);
-	        room.setCapacity((Integer) result[4]);
+	        room.setRoom_id(((Number) result[3]).intValue());
+	        room.setCapacity(((Number) result[4]).intValue());
 	        dto.setRoom(room);
 
 	        classDetails.add(dto);
 	    }
 
-	    ClassResponseDTO response = new ClassResponseDTO();
-	    response.setContent(classDetails);
-	    response.setTotalElements(results.getTotalElements());
-	    response.setTotalPages(results.getTotalPages());
-	    response.setPageNumber(results.getNumber() + 1);
-	    response.setPageSize(results.getSize());
+	    // Construct PaginationDetails
+	    PageSortDTO.PaginationDetails pagination = new PageSortDTO.PaginationDetails(
+	            results.getNumber() + 1, // pageNumber (1-based)
+	            results.getTotalPages(),
+	            (int) results.getTotalElements()
+	    );
 
-	    return response;
+	    // Return wrapped DTO
+	    return new PageSortDTO<>(classDetails, pagination);
 	}
-	
+
 	public ClassSummary getClassDetailsById(Integer classId) {
 	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);
 

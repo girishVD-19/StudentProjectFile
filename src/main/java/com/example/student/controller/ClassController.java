@@ -21,6 +21,7 @@ import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.Service.ClassService;
 
 
@@ -38,18 +39,20 @@ public class ClassController {
 			description="To Get the data of a Whole Class"
 			)
 	@GetMapping("/")
-	public ResponseEntity<ClassResponseDTO> getAllClassDetails(
+	public ResponseEntity<PageSortDTO<ClassDetailsDTO>> getAllClassDetails(
 	        @RequestParam(defaultValue = "1") Integer pageNo,
 	        @RequestParam(defaultValue = "10") Integer pageSize,
-	@RequestParam(required=false) String std){
+	        @RequestParam(required = false) String std) {
 
+	    // Create Pageable object
 	    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); // PageRequest is zero-indexed
 
 	    // Call service to fetch all class details with pagination
-	    ClassResponseDTO response = classservice.getAllClassDetails(pageable,std);
+	    PageSortDTO<ClassDetailsDTO> response = classservice.getAllClassDetails(pageable, std);
 
 	    return ResponseEntity.ok(response);
 	}
+
 
      @Operation(
     		 summary="To Get Details of the Specific Class Id",
