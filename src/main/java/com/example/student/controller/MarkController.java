@@ -3,6 +3,7 @@ package com.example.student.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.MarkDTO;
 import com.example.student.DTO.MarkResponseDTO;
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.Service.StudentMarkService;
 import com.example.student.entity.Gd_Student_Mark;
+import org.springframework.data.domain.Pageable;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -30,14 +33,15 @@ public class MarkController {
 	    private StudentMarkService markService;
 	 
 	 @GetMapping("/")
-	 @Operation(
-			 summary="To Get All Marks of Table",
-			 description="To Get All Marks of Table"
-			 )
-	    public ResponseEntity<List<MarkDTO>> getAllMarks() {
-	        List<MarkDTO> marks = markService.getAllMarks();
-	        return ResponseEntity.ok(marks);
-	    }
+	 public ResponseEntity<PageSortDTO<MarkDTO>> getAllMarks(
+	         @RequestParam(defaultValue = "0") int page,
+	         @RequestParam(defaultValue = "10") int size) {
+
+	     Pageable pageable = PageRequest.of(page, size);
+	     PageSortDTO<MarkDTO> response = markService.getAllMarks(pageable);
+	     return ResponseEntity.ok(response);
+	 }
+
 	 
 	 @PostMapping("/Add")
 	 @Operation(

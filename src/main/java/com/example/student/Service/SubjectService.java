@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.entity.Gd_Subject;
 import com.example.student.repository.SubjectRepository;
 
@@ -19,9 +21,17 @@ public class SubjectService {
 	private SubjectRepository subjectrepository;
 
     // Read All
-    public List<Gd_Subject> getAllSubjects() {
-        return subjectrepository.findAll();
-    }
+	public PageSortDTO<Gd_Subject> getAllSubjects(Pageable pageable) {
+	    Page<Gd_Subject> subjectPage = subjectrepository.findAll(pageable);
+
+	    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
+	        subjectPage.getNumber() + 1,
+	        subjectPage.getTotalPages(),
+	        (int) subjectPage.getTotalElements()
+	    );
+
+	    return new PageSortDTO<>(subjectPage.getContent(), paginationDetails);
+	}
 
     // Read One
     public Optional<Gd_Subject> getSubjectById(int id) {

@@ -55,8 +55,7 @@ public class StudentController {
 	        StudentResponseDTO response = studentService.getStudentById(id);
 	        return ResponseEntity.ok(response);
 	    }
-	    
-	    
+	    	    
 	    @Operation(
 	    		summary="To Add all the Student data",
 	    		description="To Add all the Student data"

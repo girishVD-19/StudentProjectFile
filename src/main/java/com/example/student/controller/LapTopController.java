@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import com.example.student.DTO.LaptopDTO;
 import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopbyIdDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
+import com.example.student.DTO.PageSortDTO;
+import com.example.student.DTO.SubjectMappingDTO;
 import com.example.student.Service.LapTopService;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.repository.LapTopRepository;
@@ -40,23 +43,21 @@ public class LapTopController {
 	 private LapTopRepository laptoprepository;
 
 	
-	     @GetMapping("/")
-	     public ResponseEntity<LaptopListResponseDTO> getAllLaptopDetails(
-	             @RequestParam(defaultValue = "0") int page,
-	             @RequestParam(defaultValue = "10") int size,
-	             @RequestParam(required = false) Boolean isAssigned,
-	             @RequestParam(required = false) Boolean isActive) {
+	 @GetMapping("/")
+	 public ResponseEntity<PageSortDTO<LaptopdetailsDTO>> getAllLaptopDetails(
+	         @RequestParam(defaultValue = "0") int page,
+	         @RequestParam(defaultValue = "10") int size,
+	         @RequestParam(required = false) Boolean isAssigned,
+	         @RequestParam(required = false) Boolean isActive)
+	          {
 
-	         Pageable pageable = PageRequest.of(page, size);
-	         LaptopListResponseDTO response = laptopService.getAllLaptopDetails(pageable, isAssigned, isActive);
-	         return ResponseEntity.ok(response);
-	     }
-      
-	 
-	 @GetMapping("{laptopId}")
-	    public LaptopbyIdDTO getLaptopDetails(@PathVariable Integer laptopId) {
-	        return laptopService.getLaptopDetailsById(laptopId);
-	    }
+	     Pageable pageable = PageRequest.of(page, size);
+	     
+	     // Pass the keyword and pagination details to the service
+	     PageSortDTO<LaptopdetailsDTO> response = laptopService.getAllLaptopDetails(pageable, isAssigned, isActive);
+
+	     return ResponseEntity.ok(response);
+	 }
 
 
 	    // POST a new laptop

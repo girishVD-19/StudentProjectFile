@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.MarkDTO;
@@ -12,6 +14,7 @@ import com.example.student.DTO.MarkResponseDTO;
 import com.example.student.DTO.MarkResponseDTO.SubjectMarkDTOs;
 import com.example.student.DTO.MarkResponseDTO.classDTO;
 import com.example.student.DTO.MarkResponseDTO.studentDTO;
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.DTO.StudentMarkSummaryDTO;
 import com.example.student.entity.Gd_Student;
@@ -50,11 +53,11 @@ public class StudentMarkService {
         markRepository.save(mark);
     }
     
-	public List<MarkDTO> getAllMarks() {
-	    List<Gd_Student_Mark> marks = markRepository.findAll();  // Fetching all marks from DB
+	public PageSortDTO<MarkDTO> getAllMarks(Pageable pageable) {
+	    Page<Gd_Student_Mark> marksPage = markRepository.findAll(pageable);
 	    List<MarkDTO> markDTOs = new ArrayList<>();
 
-	    for (Gd_Student_Mark mark : marks) {
+	    for (Gd_Student_Mark mark : marksPage.getContent()) {
 	        Gd_Student student = mark.getGd_student();
 	        Gd_Subject_Mapping subjectMapping = mark.getGd_subject_mapping();
 	        Gd_Subject subject = subjectMapping != null ? subjectMapping.getGd_subject() : null;
@@ -70,8 +73,15 @@ public class StudentMarkService {
 	        ));
 	    }
 
-	    return markDTOs;
+	    PageSortDTO.PaginationDetails pageDetails = new PageSortDTO.PaginationDetails(
+	        marksPage.getNumber() + 1,
+	        marksPage.getTotalPages(),
+	        (int) marksPage.getTotalElements()
+	    );
+
+	    return new PageSortDTO<>(markDTOs, pageDetails);
 	}
+
 
     public MarkDTO getMarkById(int id) {
         Gd_Student_Mark mark = markRepository.findById(id).orElse(null);

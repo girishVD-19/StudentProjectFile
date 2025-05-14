@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import com.example.student.DTO.LaptopListResponseDTO;
 import com.example.student.DTO.LaptopbyIdDTO;
 import com.example.student.DTO.LaptopdetailsDTO;
 import com.example.student.DTO.LaptopdetailsDTO.StudentDTO;
+import com.example.student.DTO.PageSortDTO;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Laptop_History;
 import com.example.student.entity.Gd_Student;
@@ -49,9 +51,10 @@ public class LapTopService {
 	 @Autowired
 	 private LaptopHistoryRepository laptophistoryrepository;
 
-	 public LaptopListResponseDTO getAllLaptopDetails(Pageable pageable, Boolean isAssigned, Boolean isActive) {
+	 public PageSortDTO<LaptopdetailsDTO> getAllLaptopDetails(Pageable pagable, Boolean isAssigned, Boolean isActive) {
 		    // Fetch paginated results with filters applied
-		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithFilters(pageable, isAssigned, isActive);
+	
+		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithFilters(pagable, isAssigned, isActive);
 
 		    List<LaptopdetailsDTO> laptopDetailsList = new ArrayList<>();
 		    Map<Integer, LaptopdetailsDTO> laptopDetailsMap = new HashMap<>();
@@ -109,14 +112,18 @@ public class LapTopService {
 		            laptopDetailsList.add(dto);
 		        }
 		    }
+     
+		    
+		    
+		    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
+		            results.getNumber() + 1,  // Page number, incremented by 1 (human-friendly)
+		            results.getTotalPages(),
+		            (int) results.getTotalElements()
+		    );
 
-		    LaptopListResponseDTO response = new LaptopListResponseDTO();
-		    response.setContent(laptopDetailsList);
-		    response.setTotalElements(results.getTotalElements());
-		    response.setTotalPages(results.getTotalPages());
-		    response.setPageNumber(results.getNumber() + 1);
-		    response.setPageSize(results.getSize());
-
+		    // Create and populate the response DTO with content and pagination details
+		    PageSortDTO<LaptopdetailsDTO> response = new PageSortDTO<>(laptopDetailsList, paginationDetails);
+		    
 		    return response;
 		}
 

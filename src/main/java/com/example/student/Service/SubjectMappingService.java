@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.SubjectMappingDTO;
@@ -27,16 +30,18 @@ public class SubjectMappingService {
     @Autowired
     private SubjectRepository gdSubjectRepository;
 
-    public List<SubjectMappingDTO> getAllSubjectMappings() {
-        List<Gd_Subject_Mapping> mappings = subjectMappingRepository.findAll();
-        return mappings.stream().map(mapping -> {
+    public Page<SubjectMappingDTO> getAllSubjectMappings(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Gd_Subject_Mapping> mappingsPage = subjectMappingRepository.findAll(pageable);
+
+        return mappingsPage.map(mapping -> {
             SubjectMappingDTO dto = new SubjectMappingDTO();
             dto.setClassId(mapping.getGd_class().getCLASS_ID());
             dto.setClassName(mapping.getGd_class().getCLASS_NAME());
             dto.setSubjectId(mapping.getGd_subject().getSUBJECT_ID());
             dto.setSubjectName(mapping.getGd_subject().getSUBJECT_NAME());
             return dto;
-        }).collect(Collectors.toList());
+        });
     }
 
     public SubjectMappingDTO getSubjectMappingDTOById(int id) {
