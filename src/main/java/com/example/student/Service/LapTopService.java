@@ -134,6 +134,7 @@ public class LapTopService {
 
 	        // Iterate over the rows and map data to the DTO
 	        for (Object[] row : rows) {
+	        	System.out.println(row);
 	            // Set laptop details (Only once for the first row)
 	            if (student == null) {
 	                Integer studentId = row[3] != null ? (Integer) row[3] : null;  // Ensure null check
