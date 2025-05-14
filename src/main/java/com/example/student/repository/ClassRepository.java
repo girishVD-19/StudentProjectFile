@@ -9,18 +9,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.student.DTO.ClassDetailsDTO;
 import com.example.student.DTO.ClassResponseDTO;
 import com.example.student.entity.Gd_Class;
 
 public interface ClassRepository extends JpaRepository<Gd_Class,Integer> {
-	@Query(value = "SELECT c.CLASS_ID, c.CLASS_NAME, c.STD, r.ROOM_ID, r.CAPACITY " +
-            "FROM GD_CLASS c " +
-            "JOIN GD_ROOMS r ON c.ROOM_ID = r.ROOM_ID " +
-            "WHERE (:std IS NULL OR c.STD = :std)",
-    countQuery = "SELECT COUNT(*) FROM GD_CLASS c " +
-                 "WHERE (:std IS NULL OR c.STD = :std)",
-    nativeQuery = true)
-Page<Object[]> findClassDetailsWithRoomAndSubjects(@Param("std") String std, Pageable pageable);
+	
+	@Query("SELECT new com.example.student.DTO.ClassDetailsDTO(c.CLASS_ID, c.CLASS_NAME, c.STD, " +
+	           "new com.example.student.DTO.RoomDTO(r.ROOM_ID, r.Capacity)) " +
+	           "FROM Gd_Class c JOIN c.gd_rooms r WHERE c.STD = :std")
+	    Page<ClassDetailsDTO> findClassDetailsWithRoom(@Param("std") String std, Pageable pageable);
+	
+	@Query("SELECT new com.example.student.DTO.ClassDetailsDTO(c.CLASS_ID, c.CLASS_NAME, c.STD, " +
+		       "new com.example.student.DTO.RoomDTO(r.ROOM_ID, r.Capacity)) " +
+		       "FROM Gd_Class c LEFT JOIN c.gd_rooms r")
+		Page<ClassDetailsDTO> findAllClassDetails(Pageable pageable);
 
 		@Query(value = "SELECT " +
 		        "c.class_id, c.class_name, c.std, " +

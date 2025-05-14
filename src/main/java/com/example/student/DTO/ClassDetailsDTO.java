@@ -6,8 +6,7 @@ public class ClassDetailsDTO {
     private String className;
     private String std;
     private RoomDTO room;
-
-    // Constructors
+// Constructors
     public ClassDetailsDTO() {}
 
     public ClassDetailsDTO(Integer classId, String className, String std, RoomDTO room) {
