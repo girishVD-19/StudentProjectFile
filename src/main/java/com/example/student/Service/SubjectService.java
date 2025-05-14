@@ -1,7 +1,9 @@
 package com.example.student.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,7 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageSortDTO;
+import com.example.student.DTO.SubjectWithClassDTO;
+import com.example.student.DTO.SubjectWithClassDTO.ClassDTO;
 import com.example.student.entity.Gd_Subject;
+import com.example.student.entity.Gd_Subject_Mapping;
 import com.example.student.repository.SubjectRepository;
 
 @Service
@@ -34,9 +39,30 @@ public class SubjectService {
 	}
 
     // Read One
-    public Optional<Gd_Subject> getSubjectById(int id) {
-        return subjectrepository.findById(id);
-    }
+	public SubjectWithClassDTO getSubjectWithClasses(int subjectId) {
+	    Optional<Gd_Subject> subjectOpt = subjectrepository.findById(subjectId);
+
+	    if (subjectOpt.isEmpty()) {
+	        throw new RuntimeException("Subject not found with id: " + subjectId);
+	    }
+
+	    Gd_Subject subject = subjectOpt.get();
+
+	    List<ClassDTO> classDTOs = subject.getGd_subject_mapping().stream()
+	        .map(Gd_Subject_Mapping::getGd_class)
+	        .filter(Objects::nonNull)
+	        .map(gdClass -> new ClassDTO(gdClass.getCLASS_ID(), gdClass.getCLASS_NAME(),gdClass.getSTD()))
+	        .collect(Collectors.toList());
+	    
+
+	    SubjectWithClassDTO dto = new SubjectWithClassDTO();
+	    dto.setSubjectId(subject.getSUBJECT_ID());
+	    dto.setSubjectName(subject.getSUBJECT_NAME());
+	    dto.setClasses(classDTOs);
+
+	    return dto;
+	}
+
 
     // Update
     public Optional<Gd_Subject> updateSubject(int id, Gd_Subject updatedSubject) {

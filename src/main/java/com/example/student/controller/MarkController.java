@@ -89,15 +89,15 @@ public class MarkController {
 			 summary="To Get The Mark Data of student By ClassId",
 			 description="To Get The Mark Data of student By ClassId"
 			 )
-    @GetMapping("student/{studentId}/class/{classId}")
-    public ResponseEntity<MarkResponseDTO> getStructuredMarksByStudentAndClass(
-            @PathVariable int studentId,
-            @PathVariable int classId) {
-
-        MarkResponseDTO response = markService.getStructuredMarks(studentId, classId);
-
+    @GetMapping("/StudentMarks")
+    public ResponseEntity<MarkResponseDTO> getStructuredMarks(
+            @RequestParam int student,
+            @RequestParam(required = false) Integer classId) {
+        
+        MarkResponseDTO response = markService.getStructuredMarks(student, classId);
+        
         if (response == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build(); // Or return 404, as per your API design
         }
 
         return ResponseEntity.ok(response);

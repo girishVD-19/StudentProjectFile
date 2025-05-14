@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.PageSortDTO;
+import com.example.student.DTO.SubjectWithClassDTO;
 import com.example.student.Service.SubjectService;
 import com.example.student.entity.Gd_Subject;
 import com.example.student.repository.SubjectRepository;
@@ -55,10 +56,9 @@ public class SubjectController {
 	@Operation(summary="To get the Student Details by Id",
 			description="To get the Student Details by Id")
 	    @GetMapping("/{id}")
-	    public ResponseEntity<Gd_Subject> getSubjectById(@PathVariable int id) {
-	        return subjectservice.getSubjectById(id)
-	                .map(ResponseEntity::ok)
-	                .orElse(ResponseEntity.notFound().build());
+	    public SubjectWithClassDTO getSubjectById(@PathVariable int id) {
+	        return subjectservice.getSubjectWithClasses(id);
+	                
 	    }
 
 	    @Operation(summary="To update the Student Details by Id",

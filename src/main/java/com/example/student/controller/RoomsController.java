@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,19 @@ public class RoomsController {
 	
 	@Autowired
 	private RoomsService roomservice;
-	
+//	
 	@GetMapping("/")
 	@Operation(summary="To Get all the data Of Rooms",
 	description="To Get all the of Rooms"
 	)
-	public ResponseEntity<PageSortDTO<Gd_Rooms>> getAllRooms(Pageable pageable) {
-	    PageSortDTO<Gd_Rooms> rooms = roomservice.getAllRooms(pageable);
-	    return ResponseEntity.ok(rooms);
+	public ResponseEntity<PageSortDTO<Gd_Rooms>> getAllRooms(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(required = false) Boolean isActive) {
+
+	    Pageable pageable = PageRequest.of(page, size);
+	    PageSortDTO<Gd_Rooms> response = roomservice.getAllRooms(pageable, isActive);
+	    return ResponseEntity.ok(response);
 	}
 
 

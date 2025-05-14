@@ -1,7 +1,9 @@
 package com.example.student.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import com.example.student.DTO.MarkResponseDTO.studentDTO;
 import com.example.student.DTO.PageSortDTO;
 import com.example.student.DTO.StudentMarkDTO;
 import com.example.student.DTO.StudentMarkSummaryDTO;
+import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Student;
 import com.example.student.entity.Gd_Student_Mark;
 import com.example.student.entity.Gd_Subject;
@@ -126,49 +129,62 @@ public class StudentMarkService {
     }
     
     
-    public MarkResponseDTO getStructuredMarks(int studentId, int classId) {
-        List<Gd_Student_Mark> marks = markRepository.findMarksByStudentIdAndClassId(studentId, classId);
+    public MarkResponseDTO getStructuredMarks(int studentId, Integer classId) {
+        List<Gd_Student_Mark> marks;
 
-        if (marks.isEmpty()) {
-            return null;
+        if (classId != null) {
+            marks = markRepository.findMarksByStudentIdAlsoClassId(studentId, classId);
+        } else {
+            marks = markRepository.findMarksByStudentId(studentId);
         }
 
-        // Student info
-        Gd_Student student = marks.get(0).getGd_student();
-        studentDTO studentDTO = new studentDTO(
-            student.getSTUDENT_ID(),
-            student.getNAME()
-        );
+        if (marks.isEmpty()) return null;
 
-        // Class info from mapping
-        Gd_Subject_Mapping firstMapping = marks.get(0).getGd_subject_mapping();
-        int classIdMapped = firstMapping.getGd_class().getCLASS_ID();
-        String className = firstMapping.getGd_class().getCLASS_NAME();
-        String std = firstMapping.getGd_class().getSTD();
+        // Get the student and their current class
+        Gd_Student student = marks.get(0).getGd_student(); // or fetch via studentRepository.findById(studentId).get()
+        studentDTO studentDTO = new studentDTO(student.getSTUDENT_ID(), student.getNAME());
 
-        classDTO classDetail = new classDTO(classIdMapped, className, std);
+        Gd_Class currentClass = student.getGd_class(); // assumes Gd_Student has a gd_class field
+        classDTO classDetail = (currentClass != null)
+            ? new classDTO(currentClass.getCLASS_ID(), currentClass.getCLASS_NAME(), currentClass.getSTD())
+            : null;
 
-        // Subject marks list
+        // Subject marks
         List<SubjectMarkDTOs> subjectDetails = new ArrayList<>();
+
         for (Gd_Student_Mark mark : marks) {
             Gd_Subject_Mapping mapping = mark.getGd_subject_mapping();
-            if (mapping != null) {
-                Gd_Subject subject = mapping.getGd_subject();
-                if (subject != null) {
-                    subjectDetails.add(new SubjectMarkDTOs(
-                        subject.getSUBJECT_ID(),
-                        subject.getSUBJECT_NAME(),
-                        mark.getMARKS(),
-                        mark.getREMARK()
-                    ));
-                }
+            Gd_Subject subject = mapping.getGd_subject();
+            Gd_Class mappedClass = mapping.getGd_class();
+
+            if (classId != null) {
+                // When classId is provided, keep subject structure clean
+                subjectDetails.add(new SubjectMarkDTOs(
+                    subject.getSUBJECT_ID(),
+                    subject.getSUBJECT_NAME(),
+                    mark.getMARKS(),
+                    mark.getREMARK()
+                ));
+            } else {
+                // Add classId inside each subject when no filtering
+                subjectDetails.add(new SubjectMarkDTOs(
+                    subject.getSUBJECT_ID(),
+                    mappedClass != null ? mappedClass.getCLASS_ID() : null,
+                    subject.getSUBJECT_NAME(),
+                    mark.getMARKS(),
+                    mark.getREMARK()
+                  
+                ));
             }
         }
 
-        // Build response DTO
         return new MarkResponseDTO(studentDTO, classDetail, subjectDetails);
     }
-  
+
+
+       
+
+
   
     public List<StudentMarkDTO> getStudentMarks(int studentId, int srNo) {
         List<Object[]> results = markRepository.findStudentMarksNative(studentId, srNo);

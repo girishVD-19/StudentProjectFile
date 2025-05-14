@@ -105,16 +105,31 @@ public class MarkResponseDTO {
 		
 		public static class SubjectMarkDTOs{
 			private Integer markId;
+			private Integer classId;
 			private String SubjectName;
 			private Integer marks;
 			private String remark;
-			public SubjectMarkDTOs(Integer markId, String subjectName, Integer marks, String remark) {
+			public SubjectMarkDTOs(Integer markId, Integer classId, String subjectName, Integer marks, String remark) {
 				super();
 				this.markId = markId;
+				this.classId=classId;
 				SubjectName = subjectName;
 				this.marks = marks;
 				this.remark = remark;
 			}
+			
+			public SubjectMarkDTOs(int subjectId, String subjectName, int marks, String remark) {
+		        this(subjectId, null, subjectName, marks, remark);
+		    }
+
+			public Integer getClassId() {
+				return classId;
+			}
+
+			public void setClassId(Integer classId) {
+				this.classId = classId;
+			}
+
 			public Integer getMarkId() {
 				return markId;
 			}

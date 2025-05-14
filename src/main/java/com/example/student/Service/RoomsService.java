@@ -25,18 +25,24 @@ public class RoomsService {
 	
 	@Autowired
 	private ClassRepository classrepository;
-	public PageSortDTO<Gd_Rooms> getAllRooms(Pageable pageable) {
-	    Page<Gd_Rooms> roomsPage = roomrepository.findAll(pageable);
-
-	    // Create pagination details with only the three required fields
+	
+	public PageSortDTO<Gd_Rooms> getAllRooms(Pageable pageable, Boolean isActive) {
+	    Page<Gd_Rooms> roomsPage = 
+	        isActive != null 
+	        ? roomrepository.findByIs_active(isActive, pageable)
+	        : roomrepository.findAll(pageable);
+	    System.out.println("isActive: " + isActive);
 	    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
-	            roomsPage.getPageable().getPageNumber(),
-	            roomsPage.getTotalPages(),
-	            (int) roomsPage.getTotalElements()
+	        roomsPage.getNumber() + 1,
+	        roomsPage.getTotalPages(),
+	        (int) roomsPage.getTotalElements()
 	    );
 
 	    return new PageSortDTO<>(roomsPage.getContent(), paginationDetails);
 	}
+
+
+
 
 
     // Get a room by its ID

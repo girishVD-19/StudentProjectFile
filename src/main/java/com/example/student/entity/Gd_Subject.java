@@ -3,7 +3,7 @@ package com.example.student.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -35,7 +35,8 @@ public class Gd_Subject {
 	@OneToMany(mappedBy="gd_subject" , cascade=CascadeType.ALL)
     private List<Gd_Subject_Mapping> gd_subject_mapping; 
     
-    @Column
+    @Column(name = "SUBJECT_NAME")
+    @JsonProperty("SubjectName")
     private String SUBJECT_NAME;
 
 	public List<Gd_Subject_Mapping> getGd_subject_mapping() {
@@ -46,15 +47,17 @@ public class Gd_Subject {
 		this.gd_subject_mapping = gd_Subject_Mapping;
 	}
 
+	@JsonProperty("SubjectName") 
 	public String getSUBJECT_NAME() {
 		return SUBJECT_NAME;
 	}
-
+    
+	@JsonProperty("SubjectName") 
 	public void setSUBJECT_NAME(String sUBJECT_NAME) {
 		SUBJECT_NAME = sUBJECT_NAME;
 	}
 	
-
+	
 	public int getSUBJECT_ID() {
 		return SUBJECT_ID;
 	}
