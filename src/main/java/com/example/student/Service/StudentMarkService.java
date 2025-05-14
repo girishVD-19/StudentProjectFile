@@ -158,8 +158,7 @@ public class StudentMarkService {
         // Build response DTO
         return new MarkResponseDTO(studentDTO, classDetail, subjectDetails);
     }
-
-    
+  
   
     public List<StudentMarkDTO> getStudentMarks(int studentId, int srNo) {
         List<Object[]> results = markRepository.findStudentMarksNative(studentId, srNo);

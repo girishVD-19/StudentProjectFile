@@ -24,7 +24,6 @@ public interface StudentMarkRepository extends JpaRepository<Gd_Student_Mark,Int
 List<Object[]> findStudentMarksNative(@Param("studentId") int studentId, @Param("srNo") int srNo);
 
 
-
     @Query(value = "SELECT mark.* FROM GD_STUDENT_MARK mark " +
                    "JOIN GD_STUDENT student ON mark.STUDENT_ID = student.STUDENT_ID " +
                    "JOIN GD_SUBJECT_MAPPTING subjectMapping ON mark.SR_NO = subjectMapping.SR_NO " +
@@ -33,5 +32,4 @@ List<Object[]> findStudentMarksNative(@Param("studentId") int studentId, @Param(
                    "AND subjectMapping.CLASS_ID = :classId", nativeQuery = true)
     List<Gd_Student_Mark> findMarksByStudentIdAndClassId(@Param("studentId") int studentId, 
                                                           @Param("classId") int classId);
-
 }

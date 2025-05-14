@@ -20,11 +20,6 @@ public class MarkResponseDTO {
 		// TODO Auto-generated constructor stub
 	}
 
-	
-
-
-	
-
 
 	public studentDTO getStudent() {
 		return student;
