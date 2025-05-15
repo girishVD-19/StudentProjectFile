@@ -55,25 +55,18 @@ public class ClassService {
 	@Autowired
 	private SubjectMappingRepository subjectmappingrepository;
 	
-	public String createGdClass(ClassDetailsDTO dto) {
-	    Gd_Rooms room = roomrepository.findById(dto.getRoom().getRoom_id())
-	        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Room ID does not exist"));
-
-	    Gd_Class gdClass = new Gd_Class();
-	    gdClass.setCLASS_NAME(dto.getClassName());
-	    gdClass.setSTD(dto.getStd());
-	    
-	   if( room.isIs_active()== true)
-	   {
-		   return "Room is already assign";
-	   }
-	   room.setIs_active(true);
-	    gdClass.setGd_roooms(room);
-
-	    Gd_Class saved = classrepository.save(gdClass);
-	    return "Class created with ID: " + saved.getCLASS_ID();
-	}
-     
+	 public Gd_Class saveClass(Gd_Class gdClass) {
+	        if (gdClass.getGd_roooms() != null) {
+	            Integer roomId = gdClass.getGd_roooms().getRoom_Id();
+	            Gd_Rooms room = roomrepository.findById(roomId)
+	                    .orElseThrow(() -> new RuntimeException("Room with ID " + roomId + " not found"));
+	            if(room.isIs_active()) {
+	            	throw new RuntimeException("Room with ID " + roomId + " Already Asigned");
+	            }
+	            gdClass.setGd_roooms(room); // set the managed (persisted) room entity
+	        }
+	        return classrepository.save(gdClass);
+	    }
 	public ClassWithStudentDTO getClassWithStudents(Integer classId) {
         Gd_Class gdClass = classrepository.findById(classId)
             .orElseThrow(() -> new IllegalArgumentException("Class not found with ID: " + classId));

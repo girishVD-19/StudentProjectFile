@@ -4,9 +4,11 @@ public class RoomWithClassDTO {
 	
 	private Integer room_id;
 	private Integer capacity;
+	private Boolean isActive;
 	private ClassDTO classes;
 	
-	
+
+
 	public Integer getRoom_id() {
 		return room_id;
 	}
@@ -25,6 +27,19 @@ public class RoomWithClassDTO {
 	public void setCapacity(Integer capacity) {
 		this.capacity = capacity;
 	}
+	
+	
+	
+
+
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
 
 
 	public ClassDTO getClasses() {
@@ -41,6 +56,12 @@ public class RoomWithClassDTO {
 		private Integer classId;
 		private String ClassName;
 		private String std;
+		
+		public ClassDTO() {
+            this.classId = 0;
+            this.ClassName = "";
+            this.std = "";
+        }
 		public Integer getClassId() {
 			return classId;
 		}

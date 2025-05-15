@@ -26,6 +26,7 @@ public class Gd_Class {
     private Integer CLASS_ID;
 	
 	@Column
+	
 	private String CLASS_NAME;
 	@Column
 	private String STD;
@@ -63,27 +64,32 @@ public class Gd_Class {
 	public void setCLASS_ID(int cLASS_ID) {
 		CLASS_ID = cLASS_ID;
 	}
-
+    
+	@JsonProperty("ClassName")
 	public String getCLASS_NAME() {
 		return CLASS_NAME;
 	}
 
+	@JsonProperty("ClassName")
 	public void setCLASS_NAME(String cLASS_NAME) {
 		CLASS_NAME = cLASS_NAME;
 	}
-
+    
+	@JsonProperty("Std")
 	public String getSTD() {
 		return STD;
 	}
 
+	@JsonProperty("Std")
 	public void setSTD(String sTD) {
 		STD = sTD;
 	}
-
+    @JsonProperty("Room")
 	public Gd_Rooms getGd_roooms() {
 		return gd_rooms;
 	}
 
+    @JsonProperty("Room")
 	public void setGd_roooms(Gd_Rooms gd_roooms) {
 		this.gd_rooms = gd_roooms;
 	}

@@ -25,7 +25,7 @@ import com.example.student.DTO.ClassSummary;
 import com.example.student.DTO.ClassWithStudentDTO;
 import com.example.student.DTO.PageSortDTO;
 import com.example.student.Service.ClassService;
-
+import com.example.student.entity.Gd_Class;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -90,14 +90,9 @@ public class ClassController {
     		 description="To Send the class Details to  the DataBase."
                ) 
 	 @PostMapping("/Add")
-	 public ResponseEntity<String> createGdClass(@RequestBody ClassDetailsDTO dto) {
-	     try {
-	         String message = classservice.createGdClass(dto);
-	         return ResponseEntity.ok(message);
-	     } catch (Exception e) {
-	         return ResponseEntity.badRequest().body("Cannot create class: duplicate or invalid data.");
-	     }
-	 }
+     public Gd_Class createClass(@RequestBody Gd_Class gdClass) {
+         return classservice.saveClass(gdClass);
+     }
      
 @Operation(summary="To Update the the Class Room",
 description="To update the class room details"

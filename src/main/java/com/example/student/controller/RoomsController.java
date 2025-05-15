@@ -27,6 +27,8 @@ import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Rooms;
 
 import io.swagger.v3.oas.annotations.Operation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("rooms")
@@ -34,6 +36,8 @@ public class RoomsController {
 	
 	@Autowired
 	private RoomsService roomservice;
+	
+	private static final Logger logger = LoggerFactory.getLogger(RoomsController.class);
 //	
 	@GetMapping("/")
 	@Operation(summary="To Get all the data Of Rooms",
@@ -54,11 +58,10 @@ public class RoomsController {
     @Operation(summary="To Get all the data Of Rooms",
 	description="To Get all the of Rooms"
 	)
-    public ResponseEntity<RoomWithClassDTO> getRoomWithClasses(@PathVariable Integer roomId) {
-        RoomWithClassDTO roomDetails = roomservice.getRoomWithClass(roomId);
-        return ResponseEntity.ok(roomDetails);
+    public RoomWithClassDTO getRoomDetails(@PathVariable Integer roomId) {
+        logger.info("Received roomId: {}", roomId);  // Log the received roomId
+        return roomservice.getRoomWithClassDetails(roomId);
     }
-
 
     // Create or update a room
     @PostMapping("Add")

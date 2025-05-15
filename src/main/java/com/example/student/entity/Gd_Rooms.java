@@ -3,6 +3,7 @@ package com.example.student.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -56,10 +57,12 @@ public class Gd_Rooms {
 		this.gd_class = gd_Class;
 	}
 
+	@JsonProperty("RoomId")
 	public int getRoom_Id() {
 		return ROOM_ID;
 	}
 
+	@JsonProperty("RoomId")
 	public void setRoom_Id(int rOOM_ID) {
 		ROOM_ID = rOOM_ID;
 	}

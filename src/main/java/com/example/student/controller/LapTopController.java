@@ -1,6 +1,7 @@
 package com.example.student.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,12 @@ public class LapTopController {
 
 	     return ResponseEntity.ok(response);
 	 }
+	 
+	 @GetMapping("{laptopId}")
+	    public LaptopbyIdDTO getLaptopDetails(@PathVariable Integer laptopId) {
+	        return laptopService.getLaptopDetailsById(laptopId);
+	    }
+
 
 
 	    // POST a new laptop
@@ -92,8 +99,15 @@ public class LapTopController {
 	        }
 	    }
 	 
-	 @PatchMapping("/deactivate/{laptopId}")
-	 public ResponseEntity<String> deactivateLaptop(@PathVariable int laptopId) {
+	 @PatchMapping("/update-status")
+	 public ResponseEntity<String> updateLaptopStatus(@RequestBody Map<String, Object> requestBody) {
+	     Integer laptopId = (Integer) requestBody.get("laptopId");
+	     Boolean isAlive = (Boolean) requestBody.get("isAlive");
+
+	     if (laptopId == null || isAlive == null) {
+	         return ResponseEntity.badRequest().body("Laptop ID and isAlive status are required");
+	     }
+
 	     Optional<Gd_Laptop> optionalLaptop = laptoprepository.findById(laptopId);
 
 	     if (!optionalLaptop.isPresent()) {
@@ -102,34 +116,26 @@ public class LapTopController {
 
 	     Gd_Laptop laptop = optionalLaptop.get();
 
-	     if (laptop.getIS_ASSIGNED() == 1) {
-	         return ResponseEntity.badRequest().body("Laptop is currently assigned and cannot be deactivated");
+	     if (!isAlive) {
+	         // Trying to deactivate
+	         if (laptop.getIS_ASSIGNED() == 1) {
+	             return ResponseEntity.badRequest().body("Laptop is currently assigned and cannot be deactivated");
+	         }
+	         laptop.setIS_ALIVE(false);
+	         laptoprepository.save(laptop);
+	         return ResponseEntity.ok("Laptop deactivated successfully");
+	     } else {
+	         // Trying to activate
+	         if (laptop.getIS_ASSIGNED() == 0) {
+	             laptop.setIS_ALIVE(true);
+	             laptoprepository.save(laptop);
+	         }
+	         return ResponseEntity.ok("Laptop activated successfully");
 	     }
-
-	     laptop.setIS_ALIVE(false);
-	     laptoprepository.save(laptop);
-	     return ResponseEntity.ok("Laptop deactivated successfully");
 	 }
-	 
-	 @PatchMapping("/activate/{laptopId}")
-	 public ResponseEntity<String> activateLaptop(@PathVariable int laptopId) {
-	     Optional<Gd_Laptop> optionalLaptop = laptoprepository.findById(laptopId);
 
-	     if (!optionalLaptop.isPresent()) {
-	         return ResponseEntity.badRequest().body("Laptop not found");
-	     }
 
-	     Gd_Laptop laptop = optionalLaptop.get();
-
-	     if (laptop.getIS_ASSIGNED() == 0) {
-	    	 laptop.setIS_ALIVE(true);
-		     laptoprepository.save(laptop);
-	     }
-	     else {
-	    	 return ResponseEntity.ok("Laptop is assigned to someone");
-	     }
-	     return ResponseEntity.ok("Laptop activated successfully");
-	 }
+		 	   
 
 	 }
 
