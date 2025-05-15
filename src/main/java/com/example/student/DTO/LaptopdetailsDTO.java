@@ -1,15 +1,22 @@
 package com.example.student.DTO;
 
-import java.util.List;
 
 public class LaptopdetailsDTO {
     private Integer laptopId;
     private Integer modelNo;
 	private Integer isAssigned;
     private Integer isActive;
-    private Object students;
+    private StudentDTO students;
 
-    // Getters and Setters
+    public StudentDTO getStudents() {
+		return students;
+	}
+
+	public void setStudents(StudentDTO students) {
+		this.students = students;
+	}
+
+	// Getters and Setters
     public Integer getLaptopId() {
         return laptopId;
     }
@@ -34,14 +41,7 @@ public class LaptopdetailsDTO {
         this.isAssigned = i;
     }
 
-    public Object getStudents() {
-        return students;
-    }
-
-    public void setStudents(Object students) {
-        this.students = students;
-    }
-    
+   
     public Integer getIsActive() {
 		return isActive;
 	}

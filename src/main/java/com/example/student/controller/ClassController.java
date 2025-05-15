@@ -59,22 +59,26 @@ public class ClassController {
     		 summary="To Get Details of the Specific Class Id",
     		 description="To get the details of the Specific Class Id"
     		 )
-	 @GetMapping("{classId}")
-	    public ResponseEntity<ClassSummary> getClassDetails(@PathVariable Integer classId) {
-	        try {
-	            ClassSummary classDetails = classservice.getClassDetailsById(classId);  // Call service method to fetch data
+     @GetMapping("/{classId}")
+     public ResponseEntity<ClassSummary> getClassDetailsById(@PathVariable Integer classId) {
+         try {
+             // Logging the incoming classId for debugging
+             System.out.println("Received classId: " + classId);
 
-	            if (classDetails == null) {
-	                // If class not found, return a 404 Not Found response
-	                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	            }
+             ClassSummary classSummary = classservice.getClassDetailsById(classId);
 
-	            return new ResponseEntity<>(classDetails, HttpStatus.OK);  // Return class details with HTTP status 200 OK
-	        } catch (Exception e) {
-	            // If any exception occurs, return 500 Internal Server Error
-	            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	        }
-	    }
+             if (classSummary != null) {
+                 return ResponseEntity.ok(classSummary);
+             } else {
+                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+             }
+         } catch (Exception e) {
+             // Print stack trace for further debugging
+             e.printStackTrace();
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+         }
+     }
+     
      @Operation(
     		 summary="To Get Details of the Students with Class",
     		 description="To Get Details of the Students with Class"

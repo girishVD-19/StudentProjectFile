@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,8 +55,9 @@ public class ClassService {
 	private RoomRepository roomrepository;
 	
 	@Autowired
-	private SubjectMappingRepository subjectmappingrepository;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
+	//Add The class to Table
 	 public Gd_Class saveClass(Gd_Class gdClass) {
 	        if (gdClass.getGd_roooms() != null) {
 	            Integer roomId = gdClass.getGd_roooms().getRoom_Id();
@@ -67,6 +70,10 @@ public class ClassService {
 	        }
 	        return classrepository.save(gdClass);
 	    }
+	 
+	 
+	 
+	 //Get class Specific detail for the ID.
 	public ClassWithStudentDTO getClassWithStudents(Integer classId) {
         Gd_Class gdClass = classrepository.findById(classId)
             .orElseThrow(() -> new IllegalArgumentException("Class not found with ID: " + classId));
@@ -75,7 +82,6 @@ public class ClassService {
         dto.setClassId(gdClass.getCLASS_ID());
         dto.setClassName(gdClass.getCLASS_NAME());
         dto.setStd(gdClass.getSTD());
-
        
         // Map students
         List<ClassWithStudentDTO.StudentDTOS> studentDTOs = gdClass.getGd_student().stream()
@@ -89,18 +95,21 @@ public class ClassService {
         	    })
         	    .collect(Collectors.toList());
 
-
         dto.setStudent(studentDTOs);
         return dto;
     }
+	
+	//Send Details if filter is Available 
 	 public Page<ClassDetailsDTO> getClassDetailsWithRoom(String std, Pageable pageable) {
 	        return classrepository.findClassDetailsWithRoom(std, pageable);
 	    }
 	 
+	//Send Details if filter is not available
 	 public Page<ClassDetailsDTO> getAllClassDetails(Pageable pageable) {
 		    return classrepository.findAllClassDetails(pageable);
 		}
 	 
+	 //Merging the Data of the page and conteny
 	 public PageSortDTO<ClassDetailsDTO> convertToPageSortDTO(Page<ClassDetailsDTO> page) {
 		    List<ClassDetailsDTO> content = page.getContent();
 		    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
@@ -110,56 +119,74 @@ public class ClassService {
 		    );
 		    return new PageSortDTO<>(content, paginationDetails);
 		}
+	 
+	 //Geting all details of specific class Id
+	 public ClassSummary getClassDetailsById(Integer classId) {
+		    // SQL query with correct GROUP BY clause
+		    String sql = "SELECT c.CLASS_ID, c.CLASS_NAME, c.STD, r.ROOM_ID, r.CAPACITY, " +
+		                 "STRING_AGG(s.SUBJECT_ID, ',') AS subject_ids, " +
+		                 "STRING_AGG(s.SUBJECT_NAME, ',') AS subject_names, " +
+		                 "STRING_AGG(st.STUDENT_ID, ',') AS student_ids, " +
+		                 "STRING_AGG(st.NAME, ',') AS student_names " +
+		                 "FROM GD_CLASS c " +
+		                 "LEFT JOIN GD_ROOMS r ON c.ROOM_ID = r.ROOM_ID " +
+		                 "LEFT JOIN GD_SUBJECT_MAPPTING sm ON c.CLASS_ID = sm.CLASS_ID " +
+		                 "LEFT JOIN GD_SUBJECT s ON sm.SUBJECT_ID = s.SUBJECT_ID " +
+		                 "LEFT JOIN GD_STUDENT st ON c.CLASS_ID = st.CLASS_ID " +
+		                 "WHERE c.CLASS_ID = :classId " +
+		                 "GROUP BY c.CLASS_ID, c.CLASS_NAME, c.STD, r.ROOM_ID, r.CAPACITY";
+
+		    // Define the parameters
+		    MapSqlParameterSource params = new MapSqlParameterSource();
+		    params.addValue("classId", classId);
+
+		    // Execute the query and map the result to ClassSummary DTO
+		    return namedParameterJdbcTemplate.queryForObject(sql, params, (rs, rowNum) -> {
+		        // Core class details
+		        Integer classIdVal = rs.getInt("CLASS_ID");
+		        String className = rs.getString("CLASS_NAME");
+		        String std = rs.getString("STD");
+
+		        // Room details
+		        Integer roomId = rs.getInt("ROOM_ID");
+		        Integer roomCapacity = rs.getInt("CAPACITY");
+		        RoomDTO roomDTO = (roomId != 0 && roomCapacity != 0) ? new RoomDTO(roomId, roomCapacity) : null;
+
+		        // Aggregated subject and student details (comma-separated values)
+		        String subjectIdsStr = rs.getString("subject_ids");
+		        String subjectNamesStr = rs.getString("subject_names");
+		        String studentIdsStr = rs.getString("student_ids");
+		        String studentNamesStr = rs.getString("student_names");
+
+		        Set<SubjectDTO> subjects = new HashSet<>();
+		        Set<StudentForClass> students = new HashSet<>();
+
+		        // Mapping subjects
+		        if (subjectIdsStr != null && subjectNamesStr != null) {
+		            String[] subjectIds = subjectIdsStr.split(",");
+		            String[] subjectNames = subjectNamesStr.split(",");
+		            for (int i = 0; i < subjectIds.length; i++) {
+		                subjects.add(new SubjectDTO(Integer.parseInt(subjectIds[i].trim()), subjectNames[i].trim()));
+		            }
+		        }
+
+		        // Mapping students
+		        if (studentIdsStr != null && studentNamesStr != null) {
+		            String[] studentIds = studentIdsStr.split(",");
+		            String[] studentNames = studentNamesStr.split(",");
+		            for (int i = 0; i < studentIds.length; i++) {
+		                students.add(new StudentForClass(Integer.parseInt(studentIds[i].trim()), studentNames[i].trim()));
+		            }
+		        }
+
+		        // Return the mapped result as a ClassSummary DTO
+		        return new ClassSummary(classIdVal, className, std, roomDTO,
+		                                new ArrayList<>(subjects), new ArrayList<>(students));
+		    });
+		}
 
 
-	public ClassSummary getClassDetailsById(Integer classId) {
-	    List<Object[]> rows = classrepository.findClassWithRelationsNative(classId);
-
-	    if (rows.isEmpty()) {
-	        throw new EntityNotFoundException("Class not found with ID: " + classId);
-	    }
-
-	    Object[] row = rows.get(0);
-
-	    // Core class details
-	    Integer classIdVal = (Integer) row[0];
-	    String className = (String) row[1];
-	    String std = (String) row[2];
-
-	    // Room
-	    Integer roomId = (Integer) row[3];
-	    Integer roomCapacity = (Integer) row[4];
-	    RoomDTO roomDTO = (roomId != null && roomCapacity != null) ? new RoomDTO(roomId, roomCapacity) : null;
-
-	    // Aggregated subject and student details
-	    String subjectIdsStr = (String) row[5];
-	    String subjectNamesStr = (String) row[6];
-	    String studentIdsStr = (String) row[7];
-	    String studentNamesStr = (String) row[8];
-
-	    Set<SubjectDTO> subjects = new HashSet<>();
-	    Set<StudentForClass> students = new HashSet<>();
-
-	    if (subjectIdsStr != null && subjectNamesStr != null) {
-	        String[] subjectIds = subjectIdsStr.split(",");
-	        String[] subjectNames = subjectNamesStr.split(",");
-	        for (int i = 0; i < subjectIds.length; i++) {
-	            subjects.add(new SubjectDTO(Integer.parseInt(subjectIds[i].trim()), subjectNames[i].trim()));
-	        }
-	    }
-
-	    if (studentIdsStr != null && studentNamesStr != null) {
-	        String[] studentIds = studentIdsStr.split(",");
-	        String[] studentNames = studentNamesStr.split(",");
-	        for (int i = 0; i < studentIds.length; i++) {
-	            students.add(new StudentForClass(Integer.parseInt(studentIds[i].trim()), studentNames[i].trim()));
-	        }
-	    }
-
-	    return new ClassSummary(classIdVal, className, std, roomDTO,
-	                            new ArrayList<>(subjects), new ArrayList<>(students));
-	}
-
+	 //Updating the Class Details
 	public Gd_Class updateClassRoom(Integer classId, Integer roomId) {
 	    Gd_Class gdClass = classrepository.findById(classId)
 	            .orElseThrow(() -> new RuntimeException("Class not found with id: " + classId));

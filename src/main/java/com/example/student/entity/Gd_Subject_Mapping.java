@@ -23,16 +23,16 @@ public class Gd_Subject_Mapping {
 	private int SR_NO;
 	
 	
-  @ManyToOne
-  @JoinColumn(name="CLASS_ID")
-  @JsonIgnore
-  private Gd_Class gd_class;
-  
-  @ManyToOne
-  @JoinColumn(name="SUBJECT_ID")
-  @JsonIgnore
-  private Gd_Subject gd_subject;
-  
+	@ManyToOne
+    @JoinColumn(name = "CLASS_ID", referencedColumnName = "CLASS_ID")
+	@JsonIgnore
+    private Gd_Class gd_class;
+
+    @ManyToOne
+    @JoinColumn(name = "SUBJECT_ID", referencedColumnName = "SUBJECT_ID")
+    @JsonIgnore
+    private Gd_Subject gd_subject;
+    
   @OneToMany(mappedBy="gd_subject_mapping", cascade= CascadeType.ALL)
   private List<Gd_Student_Mark> gd_student_mark;
   

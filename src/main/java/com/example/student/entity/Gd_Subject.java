@@ -35,7 +35,7 @@ public class Gd_Subject {
 	@OneToMany(mappedBy="gd_subject" , cascade=CascadeType.ALL)
     private List<Gd_Subject_Mapping> gd_subject_mapping; 
     
-    @Column(name = "SUBJECT_NAME")
+    @Column(name = "SUBJECT_NAME" ,unique=true)
     @JsonProperty("SubjectName")
     private String SUBJECT_NAME;
 

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageSortDTO;
@@ -24,6 +25,9 @@ public class SubjectService {
 	
 	@Autowired
 	private SubjectRepository subjectrepository;
+	
+	@Autowired 
+	private JdbcTemplate jdbctemplete;
 
     // Read All
 	public PageSortDTO<Gd_Subject> getAllSubjects(Pageable pageable) {
@@ -62,7 +66,20 @@ public class SubjectService {
 
 	    return dto;
 	}
+	 
 
+	    public Gd_Subject createSubject(Gd_Subject subject) {
+	        String subjectName = subject.getSUBJECT_NAME();
+
+	        String query = "SELECT COUNT(*) FROM GD_SUBJECT WHERE SUBJECT_NAME = ?";
+	        Integer count = jdbctemplete.queryForObject(query, Integer.class, subjectName);
+
+	        if (count != null && count > 0) {
+	            throw new IllegalArgumentException("Subject with name '" + subjectName + "' already exists.");
+	        }
+
+	        return subjectrepository.save(subject);
+	    }
 
     // Update
     public Optional<Gd_Subject> updateSubject(int id, Gd_Subject updatedSubject) {

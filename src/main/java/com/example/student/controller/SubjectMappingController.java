@@ -36,27 +36,15 @@ public class SubjectMappingController {
 			)
 	
 	@GetMapping("/")
-	public ResponseEntity<PageSortDTO<SubjectMappingDTO>> getAllSubjectMappings(
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size) {
-	    
-	    Page<SubjectMappingDTO> mappingsPage = subjectMappingService.getAllSubjectMappings(page, size);
-
-	    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
-	            mappingsPage.getPageable().getPageNumber()+1,
-	            mappingsPage.getTotalPages(),
-	            (int) mappingsPage.getTotalElements()
-	    );
-	    PageSortDTO<SubjectMappingDTO> finalResponse = new PageSortDTO<>(
-	            mappingsPage.getContent(),
-	            paginationDetails
-	    );
-
-	   
-
-	        // Return the response
-	        return new ResponseEntity<>(finalResponse, HttpStatus.OK);
-	}
+	 public ResponseEntity<PageSortDTO<SubjectMappingDTO>> getAllSubjectMappings(
+	            @RequestParam(required = false) Integer classId,
+	            @RequestParam(required = false) Integer subjectId,
+	            @RequestParam(defaultValue = "0") int page,
+	            @RequestParam(defaultValue = "10") int size
+	    ) {
+	        PageSortDTO<SubjectMappingDTO> response = subjectMappingService.getAllSubjectMappings(classId, subjectId, page, size);
+	        return ResponseEntity.ok(response);
+	    }
 
 
     // Get subject mapping by ID

@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,143 +51,139 @@ public class LapTopService {
 	 
 	 @Autowired
 	 private LaptopHistoryRepository laptophistoryrepository;
+	 
+	 @Autowired
+	    private NamedParameterJdbcTemplate jdbcTemplate;
 
-	 public PageSortDTO<LaptopdetailsDTO> getAllLaptopDetails(Pageable pagable, Boolean isAssigned, Boolean isActive) {
-		    // Fetch paginated results with filters applied
-	
-		    Page<Object[]> results = laptopRepository.findAllLaptopDetailsWithFilters(pagable, isAssigned, isActive);
+	 public PageSortDTO<LaptopdetailsDTO> getAllLaptopDetails(Pageable pageable, Boolean isAssigned, Boolean isActive) {
+		    // Construct SQL query for pagination using OFFSET-FETCH for SQL Server
+		    String query = "SELECT l.LAPTOP_ID, l.MODEL_NO, l.IS_ASSIGNED, "
+		            + "       s.STUDENT_ID AS studentId, s.NAME AS studentName, "
+		            + "       h.HISTORY_ID AS historyId, h.ASSIGNED_DATE AS assignedDate, "
+		            + "       h.RETURN_DATE AS returnDate, "
+		            + "       l.IS_ALIVE "
+		            + "FROM GD_LAPTOP l "
+		            + "LEFT JOIN GD_STUDENT s ON s.LAPTOP_ID = l.LAPTOP_ID "
+		            + "LEFT JOIN ("
+		            + "    SELECT HISTORY_ID, LAPTOP_ID, ASSIGNED_DATE, RETURN_DATE, "
+		            + "           ROW_NUMBER() OVER (PARTITION BY LAPTOP_ID ORDER BY ASSIGNED_DATE DESC) AS rn "
+		            + "    FROM GD_LAPTOP_HISTORY"
+		            + ") h ON h.LAPTOP_ID = l.LAPTOP_ID AND h.rn = 1 "
+		            + "WHERE (:isAssigned IS NULL OR l.IS_ASSIGNED = :isAssigned) "
+		            + "AND (:isAlive IS NULL OR l.IS_ALIVE = :isAlive) "
+		            + "ORDER BY l.LAPTOP_ID "
+		            + "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 
-		    List<LaptopdetailsDTO> laptopDetailsList = new ArrayList<>();
-		    Map<Integer, LaptopdetailsDTO> laptopDetailsMap = new HashMap<>();
-		  
+		    // Parameters for the query
+		    Map<String, Object> params = new HashMap<>();
+		    params.put("isAssigned", isAssigned);
+		    params.put("isAlive", isActive);
+		    params.put("limit", pageable.getPageSize());  // Page size limit
+		    params.put("offset", pageable.getPageNumber() * pageable.getPageSize());  // Calculate offset
 
-		    // Iterate over the query results
-		    for (Object[] row : results) {
-		    	 System.out.println("Row data: " + Arrays.toString(row));
-		    	 Integer laptopId = (Integer) row[0];
-		    	 LaptopdetailsDTO dto = laptopDetailsMap.get(laptopId);	    	  
+		    // Query to get the paginated list of laptops
+		    List<LaptopdetailsDTO> laptopDetailsList = jdbcTemplate.query(query, params, (rs, rowNum) -> {
+		        LaptopdetailsDTO dto = new LaptopdetailsDTO();
+		        dto.setLaptopId(rs.getInt("LAPTOP_ID"));
+		        dto.setModelNo(rs.getInt("MODEL_NO"));
+		        dto.setIsAssigned(rs.getInt("IS_ASSIGNED"));
+		        dto.setIsActive(rs.getInt("IS_ALIVE"));
 
-		        
-		        if (dto == null) {
-		            dto = new LaptopdetailsDTO();
-		            dto.setLaptopId(laptopId);
-
-		            // Handle model number (likely Integer)
-		            dto.setModelNo((row[1] != null) ? ((Number) row[1]).intValue() : null);
-
-		            // IS_ASSIGNED: Ensure proper casting (1 or 0)
-		            if (row[2] != null) {
-		                if (row[2] instanceof Integer) {
-		                    dto.setIsAssigned((Integer) row[2]);
-		                } else if (row[2] instanceof Boolean) {
-		                    dto.setIsAssigned((Boolean) row[2] ? 1 : 0); // Convert Boolean to 1/0
-		                }
-		            }
-
-		            // IS_ACTIVE: Ensure proper casting (1 or 0)
-		            if (row[8] != null) {
-		                if (row[8] instanceof Integer) {
-		                    dto.setIsActive((Integer) row[8]);
-		                } else if (row[8] instanceof Boolean) {
-		                    dto.setIsActive((Boolean) row[8] ? 1 : 0); // Convert Boolean to 1/0
-		                }
-		            }
-
-		            // Handle student info if assigned
-		            if (dto.getIsAssigned() == 1) {
-		                StudentDTO student = new StudentDTO();
-		                student.setStudentId((row[3] != null) ? ((Number) row[3]).intValue() : null);
-		                student.setStudentName((String) row[4]);
-
-		                java.sql.Date assignedDate = (java.sql.Date) row[6];
-		                if (assignedDate != null) {
-		                    student.setAssignedDate(assignedDate.toLocalDate().toString());
-		                }
-
-		                dto.setStudents(student);  // One student assigned
-		            } else {
-		                dto.setStudents(new ArrayList<>());  // No student assigned
-		            }
-
-		            laptopDetailsMap.put(laptopId, dto);
-		            laptopDetailsList.add(dto);
+		        // Handle student info if assigned
+		        if (dto.getIsAssigned() == 1) {
+		            LaptopdetailsDTO.StudentDTO student = new LaptopdetailsDTO.StudentDTO();
+		            student.setStudentId(rs.getInt("studentId"));
+		            student.setStudentName(rs.getString("studentName"));
+		            student.setAssignedDate(rs.getDate("assignedDate").toLocalDate().toString());
+		            dto.setStudents(student); // Set the student (single student, not a list)
+		        } else {
+		            dto.setStudents(null); // Set null if no student is assigned
 		        }
-		    }
-     
-		    
-		    
+
+		        return dto;
+		    });
+
+		    // Query to get the total count (same as before)
+		    String countQuery = "SELECT COUNT(*) FROM GD_LAPTOP l "
+		            + "WHERE (:isAssigned IS NULL OR l.IS_ASSIGNED = :isAssigned) "
+		            + "AND (:isAlive IS NULL OR l.IS_ALIVE = :isAlive)";
+
+		    int totalElements = jdbcTemplate.queryForObject(countQuery, params, Integer.class);
+		    int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+		    // Pagination details
 		    PageSortDTO.PaginationDetails paginationDetails = new PageSortDTO.PaginationDetails(
-		            results.getNumber() + 1,  // Page number, incremented by 1 (human-friendly)
-		            results.getTotalPages(),
-		            (int) results.getTotalElements()
+		            pageable.getPageNumber() + 1, // Page number (human-friendly)
+		            totalPages,
+		            totalElements
 		    );
 
-		    // Create and populate the response DTO with content and pagination details
-		    PageSortDTO<LaptopdetailsDTO> response = new PageSortDTO<>(laptopDetailsList, paginationDetails);
-		    
-		    return response;
+		    return new PageSortDTO<>(laptopDetailsList, paginationDetails);
 		}
 
 	 public LaptopbyIdDTO getLaptopDetailsById(Integer laptopId) {
-	        // Fetch all records for the laptop from the repository
-	        List<Object[]> rows = laptopRepository.findLaptopDetailsWithAllHistoryById(laptopId);
+		    // SQL query to get the laptop details along with student and history information
+		    String query = "SELECT l.LAPTOP_ID, l.MODEL_NO, l.IS_ASSIGNED, "
+		            + "       s.STUDENT_ID AS studentId, s.NAME AS studentName, "
+		            + "       h.HISTORY_ID AS historyId, h.ASSIGNED_DATE AS assignedDate, "
+		            + "       h.RETURN_DATE AS returnDate "
+		            + "FROM GD_LAPTOP l "
+		            + "LEFT JOIN GD_STUDENT s ON s.LAPTOP_ID = l.LAPTOP_ID "
+		            + "LEFT JOIN GD_LAPTOP_HISTORY h ON h.LAPTOP_ID = l.LAPTOP_ID "
+		            + "WHERE l.LAPTOP_ID = :laptopId "
+		            + "ORDER BY h.ASSIGNED_DATE DESC";
 
-	        if (rows.isEmpty()) {
-	            return null; // Return null or throw exception if no laptop found
-	        }
+		    // Parameters map for the query
+		    Map<String, Object> params = new HashMap<>();
+		    params.put("laptopId", laptopId);
 
-	        // List to hold the history records
-	        List<LaptopbyIdDTO.HistoryDTO> historyList = new ArrayList<>();
-	        LaptopbyIdDTO.StudentDTO student = null;
+		    // Execute the query using NamedParameterJdbcTemplate
+		    List<LaptopbyIdDTO> laptopDetailsList = jdbcTemplate.query(query, params, (rs, rowNum) -> {
+		        // First, map the laptop details
+		        Integer laptopIdValue = rs.getInt("LAPTOP_ID");
+		        Integer modelNo = rs.getInt("MODEL_NO");
+		        Integer isAssigned = rs.getInt("IS_ASSIGNED");
 
-	        // Iterate over the rows and map data to the DTO
-	        for (Object[] row : rows) {
-	        	System.out.println(row);
-	            // Set laptop details (Only once for the first row)
-	            if (student == null) {
-	                Integer studentId = row[3] != null ? (Integer) row[3] : null;  // Ensure null check
-	                if (studentId != null) {
-	                    student = new LaptopbyIdDTO.StudentDTO(
-	                            studentId,                              // studentId
-	                            row[4] != null ? (String) row[4] : null,  // studentName
-	                            row[6] != null ? ((Date) row[6]).toString() : null // assignedDate
-	                    );
-	                } else {
-	                    student = new LaptopbyIdDTO.StudentDTO(0, "", null); // No student assigned, return empty student
-	                }
-	            }
+		        // Initialize student and history list
+		        LaptopbyIdDTO.StudentDTO student = null;
+		        List<LaptopbyIdDTO.HistoryDTO> historyList = new ArrayList<>();
 
-	            // Add history records
-	            if (row[5] != null) { // If historyId exists
-	                Integer historyId = (Integer) row[5];
+		        // Map student details (Only once for the first row)
+		        if (student == null) {
+		            Integer studentId = rs.getInt("studentId");
+		            if (studentId != 0) {
+		                student = new LaptopbyIdDTO.StudentDTO(
+		                        studentId, 
+		                        rs.getString("studentName"), 
+		                        rs.getDate("assignedDate") != null ? rs.getDate("assignedDate").toString() : null
+		                );
+		            } else {
+		                student = new LaptopbyIdDTO.StudentDTO(0, "", null); // No student assigned, return empty student
+		            }
+		        }
 
-	                // Check for historyStudentId and handle null
-	                Integer historyStudentId = (row[3] != null) ? (Integer) row[3] : null;
+		        // Map history details
+		        Integer historyId = rs.getInt("historyId");
+		        if (historyId != 0) { // Only add history if exists
+		            String assignedDate = rs.getDate("assignedDate") != null ? rs.getDate("assignedDate").toString() : null;
+		            String returnDate = rs.getDate("returnDate") != null ? rs.getDate("returnDate").toString() : null;
 
-	                // Convert assignedDate and returnDate to String
-	                String historyAssignedDate = (row[6] != null) ? ((Date) row[6]).toString() : null;
-	                String historyReturnDate = (row[7] != null) ? ((Date) row[7]).toString() : null;
+		            LaptopbyIdDTO.HistoryDTO history = new LaptopbyIdDTO.HistoryDTO(
+		                    historyId, student != null ? student.getStudentId() : null, assignedDate, returnDate
+		            );
+		            historyList.add(history);
+		        }
 
-	                // If historyStudentId is null, we assign a default value to avoid errors
-	                if (historyStudentId != null) {
-	                    LaptopbyIdDTO.HistoryDTO history = new LaptopbyIdDTO.HistoryDTO(
-	                            historyId, historyStudentId, historyAssignedDate, historyReturnDate
-	                    );
-	                    historyList.add(history);
-	                }
-	            }
-	        }
+		        // Return the LaptopbyIdDTO object with student and history details
+		        return new LaptopbyIdDTO(
+		                laptopIdValue, modelNo, isAssigned, student, historyList
+		        );
+		    });
 
-	        // Return the final DTO with student and history
-	        return new LaptopbyIdDTO(
-	                (Integer) rows.get(0)[0], // laptopId
-	                (Integer) rows.get(0)[1], // modelNo
-	                (Integer) rows.get(0)[2], // isAssigned
-	                student,                  // student info inside an object
-	                historyList               // all history records
-	        );
-	    }
-	 
+		    // If no results were returned, return null
+		    return laptopDetailsList.isEmpty() ? null : laptopDetailsList.get(0);
+		}
+
 	 
 	 public String assignLaptopToStudent(int laptopId, int studentId) {
 	        // Retrieve the laptop and student entities
