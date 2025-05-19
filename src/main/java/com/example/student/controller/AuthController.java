@@ -10,6 +10,8 @@ import com.example.student.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,30 +65,33 @@ public class AuthController {
                                  .body(new JWTResponse("Invalid username or password"));
         }
     }
-    //User Register 
-    @Operation(summary="To Register a new user")
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JWTRequest request) {
-    	
-    	if (request.getUsername() == null || request.getUsername().isBlank() ||
-    	        request.getPassword() == null || request.getPassword().isBlank()) {
-    	        return ResponseEntity.badRequest().body("Username and password must not be null or empty");
-    	    }
+        // 1. Basic validation
+        if (request.getUsername() == null || request.getUsername().isBlank() ||
+            request.getPassword() == null || request.getPassword().isBlank()) {
+            return ResponseEntity.badRequest().body("Username and password must not be null or empty");
+        }
 
+        // 2. Check if username already exists
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
-         
+
+        // 3. Assign default role if none provided
+        List<String> roles = request.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            roles = List.of("USER");  // default role
+        }
+
+        // 4. Create and save user
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRoles(roles);  // Set the roles
 
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
-    }
-    
-    public AuthController(BlacklistToken tokenBlacklist) {
-        this.blacklisttoken = tokenBlacklist;
     }
 
     

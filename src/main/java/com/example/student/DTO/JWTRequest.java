@@ -1,6 +1,7 @@
 package com.example.student.DTO;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class JWTRequest implements Serializable {
 
@@ -8,14 +9,16 @@ public class JWTRequest implements Serializable {
 
     private String username;
     private String password;
+    private List<String> Roles;
 
     public JWTRequest() {
         // Default constructor
     }
 
-    public JWTRequest(String username, String password) {
+    public JWTRequest(String username, String password,List<String> roles) {
         this.username = username;
         this.password = password;
+        this.Roles=roles;
     }
 
     public String getUsername() {
@@ -33,4 +36,14 @@ public class JWTRequest implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
+	public List<String> getRoles() {
+		return Roles;
+	}
+
+	public void setRoles(List<String> roles) {
+		Roles = roles;
+	}
+    
+    
 }

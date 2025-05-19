@@ -63,9 +63,22 @@ public class ClassService {
 	            Integer roomId = gdClass.getGd_roooms().getRoom_Id();
 	            Gd_Rooms room = roomrepository.findById(roomId)
 	                    .orElseThrow(() -> new RuntimeException("Room with ID " + roomId + " not found"));
+	            
+	            String classname=gdClass.getCLASS_NAME();
+	            String query = "SELECT COUNT(*) FROM GD_CLASS WHERE CLASS_NAME = :className";
+
+	            Map<String, Object> params = new HashMap<>();
+	            params.put("className", classname);
+
+	            int count = namedParameterJdbcTemplate.queryForObject(query, params, Integer.class);
+	            if(count>0) {
+	            	throw new RuntimeException("Class " + classname+ " Already Present");
+	            }
 	            if(room.isIs_active()) {
 	            	throw new RuntimeException("Room with ID " + roomId + " Already Asigned");
 	            }
+	            
+	            
 	            gdClass.setGd_roooms(room); // set the managed (persisted) room entity
 	        }
 	        return classrepository.save(gdClass);
@@ -126,6 +139,8 @@ public class ClassService {
 		    String sql = "SELECT c.CLASS_ID, c.CLASS_NAME, c.STD, r.ROOM_ID, r.CAPACITY, " +
 		                 "STRING_AGG(s.SUBJECT_ID, ',') AS subject_ids, " +
 		                 "STRING_AGG(s.SUBJECT_NAME, ',') AS subject_names, " +
+		                 
+		                 
 		                 "STRING_AGG(st.STUDENT_ID, ',') AS student_ids, " +
 		                 "STRING_AGG(st.NAME, ',') AS student_names " +
 		                 "FROM GD_CLASS c " +

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.example.student.config.SecurityConfig;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +17,19 @@ import org.springframework.stereotype.Service;
 
 import com.example.student.DTO.PageInfoDTO;
 import com.example.student.DTO.StudentListResponseDTO;
+import com.example.student.DTO.StudentRegistrationDTO;
 import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.entity.Gd_Class;
 import com.example.student.entity.Gd_Laptop;
 import com.example.student.entity.Gd_Laptop_History;
 import com.example.student.entity.Gd_Student;
+import com.example.student.entity.User;
 import com.example.student.repository.ClassRepository;
 import com.example.student.repository.LapTopRepository;
 import com.example.student.repository.LaptopHistoryRepository;
 import com.example.student.repository.StudentRepository;
+import com.example.student.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.transaction.Transactional;
 
@@ -40,6 +45,13 @@ public class StudentService {
 	
 	@Autowired
 	private LaptopHistoryRepository laptopHistoryRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+    private PasswordEncoder passwordEncoder;
+	
+	
 
 	
 	//TO Get data of all student
@@ -105,57 +117,56 @@ public class StudentService {
 	    
    //To Add Student
     @Transactional
-	 public String addStudent(Gd_Student student) {
-		
-		    Gd_Class studentClass = student.getGd_class();
-		    if (studentClass == null || studentClass.getCLASS_ID() == null) {
-		        throw new IllegalArgumentException("Student must be associated with a valid class.");
-		    }
+    public String addStudent(StudentRegistrationDTO dto) {
+        // Create and populate Gd_Student
+        Gd_Student student = new Gd_Student();
+        student.setNAME(dto.getName());
+        student.setCITY(dto.getCity());
+        student.setActive(true);
 
-		    Integer classId = studentClass.getCLASS_ID();
-		    Gd_Class classFromDb = classrepository.findById(classId)
-		            .orElseThrow(() -> new IllegalArgumentException("Class with ID " + classId + " does not exist."));		   
-		    Gd_Student savedStudent = studentrepository.save(student);
-		    
-		   
-		    Integer studentId = savedStudent.getSTUDENT_ID(); 
-		    String rollNo = String.format("%d%d", studentId, classId);
-      
-		    savedStudent.setROLL_NO(Integer.parseInt(rollNo));
-		    student.setActive(true);
-		  
-		    studentrepository.save(savedStudent);
-		    Gd_Laptop gdLaptop = student.getGd_laptop();
-		    if (gdLaptop == null || gdLaptop.getLAPTOP_ID() == null) {
-		        throw new IllegalArgumentException("Student must be assigned a valid laptop.");
-		    }
-		    Integer laptopId = gdLaptop.getLAPTOP_ID();
-		    Gd_Laptop existingLaptop = laptoprepository.findById(laptopId)
-		            .orElseThrow(() -> new IllegalArgumentException("Laptop with ID " + laptopId + " does not exist."));
-		    
-		    if(existingLaptop.getIS_ALIVE()==false) {
-		    	 throw new IllegalArgumentException("Laptop with ID " + laptopId + " is not alive.");
-		    }
+        // Fetch Class by ID
+        Gd_Class gdClass = classrepository.findById(dto.getGd_class().getClassId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid class ID"));
 
-		    if (existingLaptop.getIS_ASSIGNED() == 1) {
-		        throw new IllegalArgumentException("Laptop with ID " + laptopId + " is already assigned.");
-		    }
+        // Fetch Laptop by ID
+        Gd_Laptop gdLaptop = laptoprepository.findById(dto.getGd_laptop().getLaptopId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid laptop ID"));
 
-		    existingLaptop.setIS_ASSIGNED(1);
-		    laptoprepository.save(existingLaptop);
+        if (!gdLaptop.getIS_ALIVE() || gdLaptop.getIS_ASSIGNED() == 1) {
+            throw new IllegalArgumentException("Laptop is not available.");
+        }
 
-		    student.setGd_class(classFromDb);
-		    student.setGd_laptop(existingLaptop);
-		    
-		 // Step: Create Laptop History entry
-		    Gd_Laptop_History history = new Gd_Laptop_History(existingLaptop, savedStudent, LocalDate.now(), null);
-		    laptopHistoryRepository.save(history);
+        // Assign Laptop and Class to student
+        gdLaptop.setIS_ASSIGNED(1);
+        laptoprepository.save(gdLaptop);
 
-		    
-		    studentrepository.save(student);
+        student.setGd_class(gdClass);
+        student.setGd_laptop(gdLaptop);
 
-		    return "Student added successfully with Roll No: " + rollNo;
-	    }
+        // Save student
+        Gd_Student savedStudent = studentrepository.save(student);
+
+        // Generate Roll No
+        Integer studentId = savedStudent.getSTUDENT_ID();
+        String rollNo = String.format("%d%d", studentId, dto.getGd_class().getClassId());
+        savedStudent.setROLL_NO(Integer.parseInt(rollNo));
+
+        studentrepository.save(savedStudent);
+
+        // Create Laptop History
+        // Implement this based on your logic if needed
+  
+        // Create User with ROLE_USER
+        User user = new User();
+        user.setUserId(studentId);
+        user.setUsername(dto.getName());
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); 
+        user.setRoles(List.of("USER"));
+
+        userRepository.save(user);
+
+        return "Student and user added successfully with Roll No: " + rollNo;
+    }
     
     @Transactional
     public Object manageStudent(Integer studentId, Gd_Student student, String action) {

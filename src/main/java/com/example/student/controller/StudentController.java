@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.student.DTO.StudentListResponseDTO;
+import com.example.student.DTO.StudentRegistrationDTO;
 import com.example.student.DTO.StudentResponseDTO;
 import com.example.student.Service.StudentService;
 import com.example.student.entity.Gd_Student;
@@ -60,8 +61,8 @@ public class StudentController {
 	    		summary="To Add all the Student data",
 	    		description="To Add all the Student data"
 	    		)   
-	@PostMapping("/Add")
-    public ResponseEntity<String> addStudent(@RequestBody Gd_Student student) {
+	@PostMapping("/auth/register")
+    public ResponseEntity<String> addStudent(@RequestBody StudentRegistrationDTO student) {
         try {
             String result = studentService.addStudent(student);
             return ResponseEntity.ok(result);

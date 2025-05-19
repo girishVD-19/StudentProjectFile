@@ -28,28 +28,40 @@ public class SecurityConfig {
 	@Autowired
 	private CustomUserDetailsService customUserDetailsService;
 	
-	 @Bean
-	    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-	                                                   JwtAuthenticationFilter jwtAuthenticationFilter,
-	                                                   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
-	        http
-	            .csrf(csrf -> csrf.disable())
-	            .authorizeHttpRequests(authz -> authz
-	                .requestMatchers("/auth/login", "/auth/register","/v3/api-docs/**", "/swagger-ui/**").permitAll()
-	                .requestMatchers("/auth/logout").authenticated() // Secure logout
-	                .anyRequest().authenticated()
-	            )
-	            .exceptionHandling(ex -> ex
-	                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-	            )
-	            .sessionManagement(session -> session
-	                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-	            )
-	            .authenticationProvider(authenticationProvider()) // Your auth provider
-	            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // 👈 Place here
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http,
+	                                               JwtAuthenticationFilter jwtAuthenticationFilter,
+	                                               JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
+	    http
+	        .csrf(csrf -> csrf.disable())
+	        .authorizeHttpRequests(authz -> authz
+	            // Permit these paths without authentication
+	            .requestMatchers("/auth/login","/file/download/{fileId}", "/teacher/register",  "/Student/auth/register", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+	            
+	            // Secure logout path (requires authentication)
+	            .requestMatchers("/auth/logout").authenticated()
 
-	        return http.build();
-	    }
+	            // Only accessible by users with "ADMIN" role
+	            .requestMatchers("/admin/**").hasRole("ADMIN")
+
+	            // Accessible by both "USER" and "ADMIN"
+	            .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+	            
+	            // Finally, require authentication for all other requests
+	            .anyRequest().authenticated()
+	        )
+	        .exceptionHandling(ex -> ex
+	            .authenticationEntryPoint(jwtAuthenticationEntryPoint) // Custom entry point for authentication errors
+	        )
+	        .sessionManagement(session -> session
+	            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless session management (for JWT authentication)
+	        )
+	        .authenticationProvider(authenticationProvider()) // Your authentication provider
+	        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before UsernamePasswordAuthenticationFilter
+
+	    return http.build();
+	}
+
 	
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
