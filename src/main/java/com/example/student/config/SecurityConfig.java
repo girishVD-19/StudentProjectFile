@@ -36,13 +36,14 @@ public class SecurityConfig {
 	        .csrf(csrf -> csrf.disable())
 	        .authorizeHttpRequests(authz -> authz
 	            // Permit these paths without authentication
-	            .requestMatchers("/auth/login","/file/download/{fileId}", "/teacher/register",  "/Student/auth/register", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+	            .requestMatchers("/auth/login", "/teacher/register",  "/Student/auth/register", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 	            
 	            // Secure logout path (requires authentication)
 	            .requestMatchers("/auth/logout").authenticated()
 
 	            // Only accessible by users with "ADMIN" role
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
+	          
 
 	            // Accessible by both "USER" and "ADMIN"
 	            .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")

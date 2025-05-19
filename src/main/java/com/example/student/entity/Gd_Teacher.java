@@ -1,6 +1,8 @@
 package com.example.student.entity;
 
 import java.io.Serializable;
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,8 +21,43 @@ public class Gd_Teacher{
 
     @Column(name = "EMAIL")
     private String email;
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+   
 
-    public Gd_Teacher() {
+    
+    public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	@ManyToMany
+    @JoinTable(
+        name = "GD_TEACHER_CLASS", // This is the name of the join table
+        joinColumns = @JoinColumn(name = "TEACHER_ID"), // The foreign key column for the teacher
+        inverseJoinColumns = @JoinColumn(name = "CLASS_ID") // The foreign key column for the class
+    )
+    private List<Gd_Class> classes;
+
+
+	public List<Gd_Class> getClasses() {
+		return classes;
+	}
+
+	public void setClasses(List<Gd_Class> classes) {
+		this.classes = classes;
+	}
+
+	public void setTeacherId(int teacherId) {
+		this.teacherId = teacherId;
+	}
+
+	public Gd_Teacher() {
     }
 
     public Gd_Teacher(Integer teacherId,String name, String email) {

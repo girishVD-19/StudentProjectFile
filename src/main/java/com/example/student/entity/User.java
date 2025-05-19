@@ -27,8 +27,8 @@ public class User implements UserDetails {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    @Column(name = "userId")
+    private Integer userId; 
 
     @Column(name="NAME")
     private String username;
@@ -47,7 +47,8 @@ public class User implements UserDetails {
     }
 
     // Constructor for creating User object
-    public User(String username, String password, List<String> roles) {
+    public User( Integer userId,String username, String password, List<String> roles) {
+    	this.userId=userId;
         this.username = username;
         this.password = password;
         this.roles = roles;

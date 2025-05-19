@@ -2,6 +2,8 @@ package com.example.student.repository;
 
 
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +22,6 @@ public interface StudentRepository extends JpaRepository<Gd_Student,Integer>{
 Page<Gd_Student> findByFilters(@Param("name") String name, 
                               @Param("city") String city, 
                               Pageable pageable);
+
+Optional<Gd_Student> findByUser_UserId(Integer userId); 
 }

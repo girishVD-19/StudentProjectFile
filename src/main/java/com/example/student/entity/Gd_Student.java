@@ -54,6 +54,21 @@ public class Gd_Student {
     private boolean isActive;  
 	
 	
+	@ManyToOne
+	@JoinColumn(name = "user_id") // This should match the column name in your DB
+	private User user;
+
+	
+	
+	
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	public boolean isActive() {
 		return isActive;

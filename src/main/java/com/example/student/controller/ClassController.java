@@ -41,7 +41,6 @@ public class ClassController {
 			summary="To Get the data of a Whole Class" ,
 			description="To Get the data of a Whole Class"
 			)
-	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/")
 	public PageSortDTO<ClassDetailsDTO> getClassDetails(
 	        @RequestParam(required = false) String std,

@@ -59,8 +59,8 @@ public class ClassService {
 	
 	//Add The class to Table
 	 public Gd_Class saveClass(Gd_Class gdClass) {
-	        if (gdClass.getGd_roooms() != null) {
-	            Integer roomId = gdClass.getGd_roooms().getRoom_Id();
+	        if (gdClass.getGd_rooms() != null) {
+	            Integer roomId = gdClass.getGd_rooms().getRoom_Id();
 	            Gd_Rooms room = roomrepository.findById(roomId)
 	                    .orElseThrow(() -> new RuntimeException("Room with ID " + roomId + " not found"));
 	            
@@ -79,7 +79,7 @@ public class ClassService {
 	            }
 	            
 	            
-	            gdClass.setGd_roooms(room); // set the managed (persisted) room entity
+	            gdClass.setGd_rooms(room); // set the managed (persisted) room entity
 	        }
 	        return classrepository.save(gdClass);
 	    }
@@ -97,7 +97,7 @@ public class ClassService {
         dto.setStd(gdClass.getSTD());
        
         // Map students
-        List<ClassWithStudentDTO.StudentDTOS> studentDTOs = gdClass.getGd_student().stream()
+        List<ClassWithStudentDTO.StudentDTOS> studentDTOs = gdClass.getGd_Student().stream()
         	    .filter(student -> student.isActive()) // or student.getIsActive() == true, depending on your method
         	    .map(student -> {
         	        ClassWithStudentDTO.StudentDTOS s = new ClassWithStudentDTO.StudentDTOS();
@@ -213,7 +213,7 @@ public class ClassService {
 	    }
 
 
-	    gdClass.setGd_roooms(room);
+	    gdClass.setGd_rooms(room);
 	    return classrepository.save(gdClass);
 	}
 
@@ -227,7 +227,7 @@ public class ClassService {
 
         existing.setCLASS_NAME(dto.getClassName());
         existing.setSTD(dto.getStd());
-        existing.setGd_roooms(room);
+        existing.setGd_rooms(room);
 
         Gd_Class updated = classrepository.save(existing);
         return new ClassDetailsDTO(updated.getCLASS_ID(), updated.getCLASS_NAME(), updated.getSTD());

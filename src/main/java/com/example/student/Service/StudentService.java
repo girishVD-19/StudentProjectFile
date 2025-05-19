@@ -75,9 +75,6 @@ public class StudentService {
 	    return response;
 	}
 
-	
-	   
-
 	    
    //ToGet Data of particular student data.
 	public StudentResponseDTO getStudentById(int studentId) {
@@ -151,7 +148,6 @@ public class StudentService {
         String rollNo = String.format("%d%d", studentId, dto.getGd_class().getClassId());
         savedStudent.setROLL_NO(Integer.parseInt(rollNo));
 
-        studentrepository.save(savedStudent);
 
         // Create Laptop History
         // Implement this based on your logic if needed

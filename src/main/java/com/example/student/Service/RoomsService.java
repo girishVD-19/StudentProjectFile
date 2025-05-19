@@ -114,7 +114,7 @@ public class RoomsService {
 	    Gd_Rooms room = roomrepository.findById(roomId)
 	            .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
 
-	    gdClass.setGd_roooms(room);
+	    gdClass.setGd_rooms(room);
 	    return classrepository.save(gdClass);
 	}
     public void deactivateRoom(Integer roomId) {
@@ -129,7 +129,7 @@ public class RoomsService {
 		    Gd_Class gdClass = classrepository.findById(roomId)
 		            .orElseThrow(() -> new RuntimeException("Class not found for this room"));
 		    
-		    gdClass.setGd_roooms(null);
+		    gdClass.setGd_rooms(null);
 		    classrepository.save(gdClass);
 	}
 
