@@ -54,7 +54,13 @@ public class AuthController {
             authenticate(request.getUsername(), request.getPassword());
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            String token = jwtHelper.generateToken(userDetails);
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            Integer userId = user.getUserId();
+            System.out.println("userId;"+userId);// ✅ Correct way to get userId
+
+            String token = jwtHelper.generateToken(userDetails,userId);
 
             JWTResponse response = new JWTResponse(token, userDetails.getUsername());
             return ResponseEntity.ok(response);

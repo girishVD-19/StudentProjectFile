@@ -9,13 +9,25 @@ public class JWTRequest implements Serializable {
 
     private String username;
     private String password;
+    private Integer userId;
     private List<String> Roles;
 
     public JWTRequest() {
         // Default constructor
     }
 
-    public JWTRequest(String username, String password,List<String> roles) {
+    
+    public Integer getUserId() {
+		return userId;
+	}
+
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+
+	public JWTRequest(String username, String password,List<String> roles) {
         this.username = username;
         this.password = password;
         this.Roles=roles;

@@ -3,12 +3,13 @@ package com.example.student.config;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,13 +57,57 @@ public class JwtHelper {
 	}
 
 	
-    @PostConstruct
-    public void init() {
-        if (secretKey == null || secretKey.length() < 32) {
-            throw new IllegalArgumentException("JWT secret key must be at least 32 characters long");
+	@PostConstruct
+	public void init() {
+	    logger.info("Initializing JwtHelper...");
+
+	    if (secretKey == null || secretKey.length() < 32) {
+	        throw new IllegalArgumentException("JWT secret key must be at least 32 characters long. Actual: " + (secretKey == null ? "null" : secretKey.length()));
+	    }
+
+	    this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+	    logger.info("JWT key initialized successfully.");
+	}
+
+	public Integer extractUserId(String token) {
+        Claims claims = extractClaims(token);
+        
+        Object userIdObj = claims.get("userId");
+        System.out.println( "Token Object Integer:"+userIdObj);
+
+        if (userIdObj instanceof Integer) {
+            return (Integer) userIdObj;
+        } else if (userIdObj instanceof String) {
+            return Integer.valueOf((String) userIdObj);
+        } else if (userIdObj instanceof Number) {
+            return ((Number) userIdObj).intValue();
+        } else {
+            throw new IllegalArgumentException("Invalid or missing userId in token");
         }
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
+    // Method to extract claims from the token
+	private Claims extractClaims(String token) {
+	    try {
+	        return Jwts.parserBuilder()
+	                   .setSigningKey(key)  // Use the initialized key
+	                   .build()
+	                   .parseClaimsJws(token)
+	                   .getBody();
+	    } catch (JwtException | IllegalArgumentException e) {
+	        // Handle invalid token
+	        logger.error("Error extracting claims from token", e);
+	        return null;  // Return null if there was an issue
+	    }
+	}
+
+    public String getTokenFromRequest(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);  // Remove "Bearer " prefix
+        }
+        return null;
+    }
+
 
 
     public String getUsernameFromToken(String token) {
@@ -78,27 +123,31 @@ public class JwtHelper {
         return claimsResolver.apply(claims);
     }
 
+    
+
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    	System.out.println("JWT Secret: " + secretKey);
+    	 return Jwts.parserBuilder()
+                 .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
+                 .build()
+                 .parseClaimsJws(token)
+                 .getBody();
+  
     }
 
     private boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, Integer userId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities()
                 .stream()
                 .map(auth -> auth.getAuthority())
                 .toList());
+        claims.put("userId", userId); // ✅ add userId to token
         return createToken(claims, userDetails.getUsername());
     }
-
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()

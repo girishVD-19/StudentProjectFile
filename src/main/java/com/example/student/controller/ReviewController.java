@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.student.DTO.ReviewRequestDTO;
 import com.example.student.Service.ReviewService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("review")
 public class ReviewController {
@@ -20,8 +22,8 @@ public class ReviewController {
 	
 	@PreAuthorize("hasRole('TEACHER')")
 	@PostMapping("send")
-    public ResponseEntity<?> submitReview(@RequestBody ReviewRequestDTO request) {
-        reviewservice.submitReview(request);
+    public ResponseEntity<?> submitReview(@RequestBody ReviewRequestDTO request,HttpServletRequest httpRequest) {
+        reviewservice.submitReview(request,httpRequest);
         return ResponseEntity.ok("Review submitted successfully.");
     }
 
