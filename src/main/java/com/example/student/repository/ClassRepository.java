@@ -45,5 +45,8 @@ public interface ClassRepository extends JpaRepository<Gd_Class,Integer> {
 		        "WHERE c.class_id = :classId",
 		        nativeQuery = true)
 		List<Object[]> findClassWithRelationsNative(@Param("classId") Integer classId);
+		
+		
+		
 
 		}

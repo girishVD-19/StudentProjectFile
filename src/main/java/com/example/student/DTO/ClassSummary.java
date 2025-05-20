@@ -13,6 +13,8 @@ public class ClassSummary {
     private RoomDTO room;
     private Set<SubjectDTO> subjects = new HashSet<>();
     private Set<StudentForClass> students = new HashSet<>();
+    
+    
 	public ClassSummary(Integer classId, String className, String std, RoomDTO room, Set<SubjectDTO> subjects,
 			Set<StudentForClass> students) {
 		super();
