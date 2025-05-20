@@ -1,7 +1,9 @@
 package com.example.student.DTO;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ClassSummary {
 	
@@ -9,17 +11,17 @@ public class ClassSummary {
     private String className;
     private String std;
     private RoomDTO room;
-    private List<SubjectDTO> subjects = new ArrayList<>();
-    private List<StudentForClass> students = new ArrayList<>();
-	public ClassSummary(Integer classId, String className, String std, RoomDTO room, List<SubjectDTO> subjects,
-			List<StudentForClass> students) {
+    private Set<SubjectDTO> subjects = new HashSet<>();
+    private Set<StudentForClass> students = new HashSet<>();
+	public ClassSummary(Integer classId, String className, String std, RoomDTO room, Set<SubjectDTO> subjects,
+			Set<StudentForClass> students) {
 		super();
 		this.classId = classId;
 		this.className = className;
 		this.std = std;
 		this.room = room;
-		this.subjects = subjects != null ? subjects : new ArrayList<>();
-        this.students = students != null ? students : new ArrayList<>();
+		this.subjects = subjects != null ? subjects : new HashSet<>();
+        this.students = students != null ? students : new HashSet<>();
 	}
 	public Integer getClassId() {
 		return classId;
@@ -45,16 +47,16 @@ public class ClassSummary {
 	public void setRoom(RoomDTO room) {
 		this.room = room;
 	}
-	public List<SubjectDTO> getSubjects() {
+	public Set<SubjectDTO> getSubjects() {
 		return subjects;
 	}
-	public void setSubjects(List<SubjectDTO> subjects) {
+	public void setSubjects(Set<SubjectDTO> subjects) {
 		this.subjects = subjects;
 	}
-	public List<StudentForClass> getStudents() {
+	public Set<StudentForClass> getStudents() {
 		return students;
 	}
-	public void setStudents(List<StudentForClass> students) {
+	public void setStudents(Set<StudentForClass> students) {
 		this.students = students;
 	}
 }

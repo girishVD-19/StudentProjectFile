@@ -38,7 +38,9 @@ public class Gd_Review {
     private String comment;
     private LocalDateTime reviewedAt;
     
-    
+    public Gd_Review() {
+    	
+    }
     
     
 	public Gd_Review(Gd_FileSubmission fileSubmission, User reviewer, ReviewStatus status, String comment,

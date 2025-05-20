@@ -1,5 +1,6 @@
 package com.example.student.DTO;
 
+import java.util.Objects;
 
 public class SubjectDTO {
 	 private int id;
@@ -21,6 +22,20 @@ public class SubjectDTO {
 			this.id = id;
 			this.name = name;
 		}
+		
+		@Override
+	    public boolean equals(Object o) {
+	        if (this == o) return true;
+	        if (!(o instanceof SubjectDTO)) return false;
+	        SubjectDTO that = (SubjectDTO) o;
+	        return Objects.equals(id, that.id) &&
+	               Objects.equals(name, that.name);
+	    }
+
+	    @Override
+	    public int hashCode() {
+	        return Objects.hash(id, name);
+	    }
 		
 		
 	    

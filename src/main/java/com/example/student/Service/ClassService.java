@@ -196,7 +196,7 @@ public class ClassService {
 
 		        // Return the mapped result as a ClassSummary DTO
 		        return new ClassSummary(classIdVal, className, std, roomDTO,
-		                                new ArrayList<>(subjects), new ArrayList<>(students));
+		                                new HashSet<>(subjects), new HashSet<>(students));
 		    });
 		}
 

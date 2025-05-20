@@ -1,5 +1,7 @@
 package com.example.student.DTO;
 
+import java.util.Objects;
+
 public class StudentForClass {
 	
 	private Integer studentId;
@@ -21,6 +23,20 @@ public class StudentForClass {
 		this.studentId = studentId;
 		this.name = name;
 	}
+	
+	@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StudentForClass)) return false;
+        StudentForClass that = (StudentForClass) o;
+        return Objects.equals(studentId, that.studentId) &&
+               Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(studentId, name);
+    }
  
 
 }

@@ -1,14 +1,19 @@
 package com.example.student.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,7 +38,19 @@ public class Gd_FileSubmission {
 
 	    private LocalDateTime createdAt;
 	    
-	    public Gd_FileSubmission() {
+	    @OneToMany(mappedBy = "fileSubmission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	    private List<Gd_Review> reviews = new ArrayList<>();
+	    
+	      
+	    public List<Gd_Review> getReviews() {
+			return reviews;
+		}
+
+		public void setReviews(List<Gd_Review> reviews) {
+			this.reviews = reviews;
+		}
+
+		public Gd_FileSubmission() {
 	    	
 	    }
 
